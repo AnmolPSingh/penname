@@ -36,7 +36,9 @@ def _build_parser() -> argparse.ArgumentParser:
     pseudo = sub.add_parser(
         "pseudonymize", help="swap sensitive values for pen names"
     )
-    pseudo.add_argument("input", help="the document to open (.txt, .md, or .csv)")
+    pseudo.add_argument(
+        "input", help="the document to open (.txt, .md, .csv, .xlsx, or .docx)"
+    )
     pseudo.add_argument("-o", "--output", help="where to save the pen-named copy")
     pseudo.add_argument("--mapping", help="where to save the encrypted mapping file")
 
@@ -65,8 +67,17 @@ def _pseudonymize(args: argparse.Namespace) -> int:
     )
 
     session = PennameSession()
-    if source.suffix.lower() == ".csv":
+    suffix = source.suffix.lower()
+    if suffix == ".csv":
         mapping = pseudonymize_csv(source, dest, session)
+    elif suffix == ".xlsx":
+        from penname.core.io.xlsx_io import pseudonymize_xlsx
+
+        mapping = pseudonymize_xlsx(source, dest, session)
+    elif suffix == ".docx":
+        from penname.core.io.docx_io import pseudonymize_docx
+
+        mapping = pseudonymize_docx(source, dest, session)
     else:
         result = session.pseudonymize(read_document(source))
         write_document(dest, result.text)
