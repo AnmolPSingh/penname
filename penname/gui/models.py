@@ -11,7 +11,7 @@ from dataclasses import dataclass, field, replace
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 
 from penname.core.types import Mapping
-from penname.gui.labels import certainty_label, entity_label
+from penname.core.labels import certainty_label, entity_label
 
 COLUMNS = ("Give a pen name?", "Real value", "What it is", "How sure?", "Pen name")
 COL_REPLACE, COL_ORIGINAL, COL_TYPE, COL_CERTAINTY, COL_PEN = range(5)

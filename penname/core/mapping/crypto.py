@@ -17,7 +17,9 @@ class MappingFileError(Exception):
 
 def encrypt(key: bytes, plaintext: bytes) -> bytes:
     nonce = secrets.token_bytes(_NONCE_LEN)
-    ciphertext = AESGCM(key).encrypt(nonce, plaintext, MAGIC)
+    # The version byte is part of the AAD so tampering with it is detected
+    # cryptographically, not just by the schema check.
+    ciphertext = AESGCM(key).encrypt(nonce, plaintext, MAGIC + bytes([VERSION]))
     return MAGIC + bytes([VERSION]) + nonce + ciphertext
 
 
@@ -30,7 +32,9 @@ def decrypt(key: bytes, blob: bytes) -> bytes:
         raise MappingFileError(f"unsupported mapping file version: {version}")
     nonce = blob[len(MAGIC) + 1 : header_len]
     try:
-        return AESGCM(key).decrypt(nonce, blob[header_len:], MAGIC)
+        return AESGCM(key).decrypt(
+            nonce, blob[header_len:], MAGIC + bytes([version])
+        )
     except Exception as exc:
         raise MappingFileError(
             "could not unlock this mapping file — wrong key or damaged file"

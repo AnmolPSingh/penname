@@ -13,33 +13,14 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QThread, Signal
 
 from penname.core.engine import PennameSession, RoundTripError
-from penname.core.io.csv_io import pseudonymize_csv
+from penname.core.io.dispatch import SUPPORTED_SUFFIXES, pseudonymize_file
 from penname.core.io.markdown import export_markdown
-from penname.core.io.text import read_document, write_document
+from penname.core.io.text import write_document
 from penname.core.mapping.crypto import MappingFileError
 from penname.core.mapping.store import MappingStore
 from penname.core.replace.applier import reverse_text
 from penname.core.types import Mapping
 from penname.gui.models import ReviewRow
-
-SUPPORTED_SUFFIXES = (".txt", ".md", ".csv", ".xlsx", ".docx")
-
-
-def _pseudonymize_file(source: Path, dest: Path, session: PennameSession) -> Mapping:
-    suffix = source.suffix.lower()
-    if suffix == ".csv":
-        return pseudonymize_csv(source, dest, session)
-    if suffix == ".xlsx":
-        from penname.core.io.xlsx_io import pseudonymize_xlsx
-
-        return pseudonymize_xlsx(source, dest, session)
-    if suffix == ".docx":
-        from penname.core.io.docx_io import pseudonymize_docx
-
-        return pseudonymize_docx(source, dest, session)
-    result = session.pseudonymize(read_document(source))
-    write_document(dest, result.text)
-    return result.mapping
 
 
 class _ScanWorker(QObject):
@@ -58,7 +39,7 @@ class _ScanWorker(QObject):
             # content only — real values never touch the temp directory).
             self._flow._ensure_session()
             with tempfile.TemporaryDirectory(prefix="penname-") as tmp:
-                mapping = _pseudonymize_file(
+                mapping = pseudonymize_file(
                     self._source,
                     Path(tmp) / f"scan{self._source.suffix}",
                     self._flow.session,
@@ -86,6 +67,8 @@ class DocumentFlow(QObject):
 
     # -- step 1: open + scan ----------------------------------------------
     def open_document(self, path: str | Path) -> None:
+        if self._thread is not None and self._thread.isRunning():
+            return  # a scan is already in flight; ignore re-entrant calls
         source = Path(path)
         self.source = source
         self.scan_started.emit(source.name)
@@ -125,7 +108,7 @@ class DocumentFlow(QObject):
         """Fast re-run after review changes (pen names are cached)."""
         assert self.source is not None and self.session is not None
         with tempfile.TemporaryDirectory(prefix="penname-") as tmp:
-            return _pseudonymize_file(
+            return pseudonymize_file(
                 self.source, Path(tmp) / f"scan{self.source.suffix}", self.session
             )
 
@@ -133,7 +116,7 @@ class DocumentFlow(QObject):
     def export(self, dest: str | Path, also_markdown: bool) -> tuple[Path, Path | None]:
         assert self.source is not None and self.session is not None
         dest = Path(dest)
-        mapping = _pseudonymize_file(self.source, dest, self.session)
+        mapping = pseudonymize_file(self.source, dest, self.session)
         mapping_path = dest.with_suffix(".pnmap")
         MappingStore().save(mapping, mapping_path)
         markdown_path: Path | None = None

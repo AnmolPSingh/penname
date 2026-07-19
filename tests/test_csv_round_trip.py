@@ -31,15 +31,17 @@ def test_csv_cells_round_trip(tmp_path: Path) -> None:
             assert reverse_text(pen_cell, mapping) == orig_cell
 
 
-def test_csv_header_passes_through_and_names_are_replaced(tmp_path: Path) -> None:
+def test_csv_scans_every_row_and_replaces_names(tmp_path: Path) -> None:
+    """Every row is scanned — including row 0, because blindly skipping a
+    "header" would silently leak real data from headerless CSV exports.
+    Header cells that do get flagged remain fully reversible (covered by
+    test_csv_cells_round_trip)."""
     out = tmp_path / "donors.pen.csv"
 
     pseudonymize_csv(FIXTURE, out, PennameSession())
 
-    original_rows = _rows(FIXTURE)
     pen_rows = _rows(out)
-    assert pen_rows[0] == original_rows[0]  # header untouched
-    flat = [cell for row in pen_rows[1:] for cell in row]
+    flat = [cell for row in pen_rows for cell in row]
     assert "Margaret Wilson" not in flat
     assert "m.wilson@homemail.com" not in flat
 

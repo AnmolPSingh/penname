@@ -9,12 +9,15 @@ import argparse
 import sys
 from pathlib import Path
 
+import tempfile
+
 from penname.core.engine import PennameSession, RoundTripError
-from penname.core.io.csv_io import pseudonymize_csv
+from penname.core.io.dispatch import pseudonymize_file
 from penname.core.io.text import read_document, write_document
 from penname.core.mapping.crypto import MappingFileError
 from penname.core.mapping.store import MappingStore
 from penname.core.replace.applier import reverse_text
+from penname.core.labels import entity_label
 
 REVIEW_REMINDER = (
     "Review before sending. Penname reduces what you share — "
@@ -41,6 +44,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pseudo.add_argument("-o", "--output", help="where to save the pen-named copy")
     pseudo.add_argument("--mapping", help="where to save the encrypted mapping file")
+    pseudo.add_argument(
+        "--yes",
+        action="store_true",
+        help="save without the interactive check (the found values are still "
+        "printed — review them before sharing the file)",
+    )
 
     reverse = sub.add_parser(
         "reverse", help="take the pen names off an AI assistant's response"
@@ -67,26 +76,39 @@ def _pseudonymize(args: argparse.Namespace) -> int:
     )
 
     session = PennameSession()
-    suffix = source.suffix.lower()
-    if suffix == ".csv":
-        mapping = pseudonymize_csv(source, dest, session)
-    elif suffix == ".xlsx":
-        from penname.core.io.xlsx_io import pseudonymize_xlsx
 
-        mapping = pseudonymize_xlsx(source, dest, session)
-    elif suffix == ".docx":
-        from penname.core.io.docx_io import pseudonymize_docx
+    # Review is a mandatory step, not an option: scan first (to a throwaway
+    # file holding pseudonymized content only), show what was found, and only
+    # write real outputs after the user confirms.
+    with tempfile.TemporaryDirectory(prefix="penname-") as tmp:
+        mapping = pseudonymize_file(source, Path(tmp) / f"scan{source.suffix}", session)
 
-        mapping = pseudonymize_docx(source, dest, session)
-    else:
-        result = session.pseudonymize(read_document(source))
-        write_document(dest, result.text)
-        mapping = result.mapping
+    print(f"Penname found {len(mapping.entries)} value(s) that may be sensitive:\n")
+    for entry in mapping.entries:
+        print(f"  {entry.original}  ->  {entry.pen_name}  ({entity_label(entry.entity_type)})")
+    print(
+        "\nNo tool catches everything — read your document once more before "
+        "sharing it."
+    )
 
+    if not args.yes:
+        if not sys.stdin.isatty():
+            print(
+                "\nNothing was saved. Review the values above, then run again "
+                "with --yes to save.",
+                file=sys.stderr,
+            )
+            return 1
+        answer = input("\nSave the pen-named copy? [y/N] ").strip().lower()
+        if answer not in ("y", "yes"):
+            print("Nothing was saved.")
+            return 1
+
+    mapping = pseudonymize_file(source, dest, session)
     MappingStore().save(mapping, mapping_path)
 
     count = len(mapping.entries)
-    print(f"Gave pen names to {count} value{'s' if count != 1 else ''}.")
+    print(f"\nGave pen names to {count} value{'s' if count != 1 else ''}.")
     print(f"Saved the pen-named copy to: {dest}")
     print(f"Saved the encrypted mapping to: {mapping_path}")
     print(REVIEW_REMINDER)

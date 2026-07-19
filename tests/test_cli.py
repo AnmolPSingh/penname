@@ -28,11 +28,12 @@ def test_pseudonymize_then_reverse_text(tmp_path: Path, capsys) -> None:
     restored = tmp_path / "restored.txt"
 
     assert main(
-        ["pseudonymize", str(FIXTURE), "-o", str(out), "--mapping", str(mapping_path)]
+        ["pseudonymize", str(FIXTURE), "-o", str(out), "--mapping", str(mapping_path), "--yes"]
     ) == 0
     stdout = capsys.readouterr().out
     assert "Review before sending" in stdout
     assert "pen name" in stdout.lower()
+    assert "Margaret Wilson" in stdout  # the review listing shows what was found
     assert out.exists() and mapping_path.exists()
     assert out.read_bytes() != FIXTURE.read_bytes()
 
@@ -51,10 +52,24 @@ def test_pseudonymize_csv(tmp_path: Path) -> None:
     mapping_path = tmp_path / "donors.pnmap"
 
     assert main(
-        ["pseudonymize", str(CSV_FIXTURE), "-o", str(out), "--mapping", str(mapping_path)]
+        ["pseudonymize", str(CSV_FIXTURE), "-o", str(out), "--mapping", str(mapping_path), "--yes"]
     ) == 0
     assert out.exists()
     assert b"Margaret Wilson" not in out.read_bytes()
+
+
+def test_review_is_required_before_saving(tmp_path: Path, capsys) -> None:
+    """Without --yes (and no terminal to ask in), nothing is written."""
+    out = tmp_path / "letter.pen.txt"
+    mapping_path = tmp_path / "letter.pnmap"
+
+    assert main(
+        ["pseudonymize", str(FIXTURE), "-o", str(out), "--mapping", str(mapping_path)]
+    ) == 1
+    captured = capsys.readouterr()
+    assert "Nothing was saved" in captured.err
+    assert not out.exists() and not mapping_path.exists()
+    assert "Margaret Wilson" in captured.out  # the values were still shown for review
 
 
 def test_missing_input_is_a_clear_error(tmp_path: Path, capsys) -> None:
@@ -66,6 +81,8 @@ def test_never_says_the_a_word(tmp_path: Path, capsys) -> None:
     """"Pseudonymize", never "anonymize" — the required disclaimer's "does not
     make data anonymous" phrasing is the only permitted use of the root."""
     out = tmp_path / "letter.pen.txt"
-    main(["pseudonymize", str(FIXTURE), "-o", str(out), "--mapping", str(tmp_path / "m.pnmap")])
+    main(
+        ["pseudonymize", str(FIXTURE), "-o", str(out), "--mapping", str(tmp_path / "m.pnmap"), "--yes"]
+    )
     captured = capsys.readouterr()
     assert "anonymiz" not in (captured.out + captured.err).lower()

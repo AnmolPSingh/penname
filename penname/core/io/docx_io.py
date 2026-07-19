@@ -39,7 +39,9 @@ def pseudonymize_docx(
 ) -> Mapping:
     doc = Document(str(source))
     entries: dict[tuple[str, str], MappingEntry] = {}
-    replaced: list[tuple[str, str]] = []
+    # Every paragraph, changed or not: untouched text must also survive the
+    # union mapping's reversal (see xlsx_io for the failure mode).
+    processed: list[tuple[str, str]] = []
 
     for paragraph in _iter_paragraphs(doc):
         text = paragraph.text
@@ -48,12 +50,12 @@ def pseudonymize_docx(
         result = session.pseudonymize(text)
         for entry in result.mapping.entries:
             entries[(entry.entity_type, entry.original)] = entry
+        processed.append((text, result.text))
         if result.text != text:
-            replaced.append((text, result.text))
             _rewrite(paragraph, result.text)
 
     mapping = Mapping(entries=tuple(entries.values()))
-    for original, pseudonymized in replaced:
+    for original, pseudonymized in processed:
         if reverse_text(pseudonymized, mapping) != original:
             raise RoundTripError(
                 "a value in this document could not be pseudonymized reversibly"

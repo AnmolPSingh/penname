@@ -63,6 +63,24 @@ def test_xlsx_replaces_names_and_preserves_formulas(
     assert donors["A2"].value == donors["A4"].value
 
 
+def test_xlsx_refuses_pen_name_colliding_with_untouched_cell(tmp_path: Path) -> None:
+    """A pen name that duplicates text in a cell detection never touched would
+    be silently rewritten into the wrong donor's data on restore. The export
+    must refuse instead (verification covers unchanged cells too)."""
+    wb = Workbook()
+    ws = wb.active
+    ws["A1"] = "Priya Raghunathan"
+    ws["A2"] = "ZQX-77"  # opaque code detection will not flag
+    path = tmp_path / "collide.xlsx"
+    wb.save(path)
+
+    session = PennameSession()
+    session.set_pen_name("PERSON", "Priya Raghunathan", "ZQX-77")
+
+    with pytest.raises(Exception):
+        pseudonymize_xlsx(path, tmp_path / "out.xlsx", session)
+
+
 def test_xlsx_consistency_spans_sheets(workbook_path: Path, tmp_path: Path) -> None:
     out = tmp_path / "donors.pen.xlsx"
     mapping = pseudonymize_xlsx(workbook_path, out, PennameSession())

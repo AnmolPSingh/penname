@@ -20,7 +20,10 @@ def pseudonymize_xlsx(
 ) -> Mapping:
     workbook = load_workbook(source)
     entries: dict[tuple[str, str], MappingEntry] = {}
-    replaced: list[tuple[str, str]] = []  # (original, pseudonymized) per changed cell
+    # Every text cell, changed or not: untouched cells must also survive the
+    # union mapping's reversal, or an undetected value could be rewritten into
+    # a different donor's data on restore.
+    processed: list[tuple[str, str]] = []
 
     for worksheet in workbook.worksheets:
         for row in worksheet.iter_rows():
@@ -31,12 +34,12 @@ def pseudonymize_xlsx(
                 result = session.pseudonymize(value)
                 for entry in result.mapping.entries:
                     entries[(entry.entity_type, entry.original)] = entry
+                processed.append((value, result.text))
                 if result.text != value:
-                    replaced.append((value, result.text))
                     cell.value = result.text
 
     mapping = Mapping(entries=tuple(entries.values()))
-    for original, pseudonymized in replaced:
+    for original, pseudonymized in processed:
         if reverse_text(pseudonymized, mapping) != original:
             raise RoundTripError(
                 "a value in this workbook could not be pseudonymized reversibly"

@@ -18,17 +18,16 @@ def pseudonymize_csv(
     source: str | Path,
     dest: str | Path,
     session: PennameSession,
-    has_header: bool = True,
 ) -> Mapping:
     with open(source, newline="", encoding="utf-8") as f:
         rows = list(csv.reader(f))
 
     entries: dict[tuple[str, str], MappingEntry] = {}
     out_rows: list[list[str]] = []
-    for index, row in enumerate(rows):
-        if has_header and index == 0:
-            out_rows.append(row)
-            continue
+    # Every row is scanned, including a possible header row: cells without
+    # sensitive values pass through unchanged, and skipping row 0 blindly
+    # would silently leak real data from headerless files.
+    for row in rows:
         out_row = []
         for cell in row:
             result = session.pseudonymize(cell)
