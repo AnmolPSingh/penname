@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: uv sync
+      - name: Round-trip suite (gate)
+        run: uv run pytest tests/test_round_trip.py -q
+      - name: Full test suite with coverage
+        run: uv run pytest --cov=penname --cov-fail-under=80 -q
