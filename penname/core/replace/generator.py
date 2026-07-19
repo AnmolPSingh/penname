@@ -37,6 +37,7 @@ class PenNameGenerator:
             self._faker.seed_instance(seed)
         self._cache: dict[tuple[str, str], str] = {}
         self._used: set[str] = set()
+        self._pinned: set[tuple[str, str]] = set()
         # Dates shift by one session-stable delta so intervals stay plausible.
         sign = 1 if self._faker.random_int(0, 1) else -1
         self._date_delta = timedelta(days=sign * self._faker.random_int(30, 400))
@@ -61,10 +62,24 @@ class PenNameGenerator:
         raise PenNameError(f"could not generate a pen name for a {entity_type} value")
 
     def forget(self, entity_type: str, original: str) -> None:
-        """Drop a cached pen name so the next request regenerates it."""
-        pen = self._cache.pop((entity_type, original), None)
+        """Drop a cached pen name so the next request regenerates it.
+        Pinned (user-chosen) pen names are never forgotten."""
+        key = (entity_type, original)
+        if key in self._pinned:
+            return
+        pen = self._cache.pop(key, None)
         if pen is not None:
             self._used.discard(pen)
+
+    def pin_pen_name(self, entity_type: str, original: str, pen_name: str) -> None:
+        """Set a user-chosen pen name that generation and retries must respect."""
+        key = (entity_type, original)
+        previous = self._cache.get(key)
+        if previous is not None:
+            self._used.discard(previous)
+        self._cache[key] = pen_name
+        self._used.add(pen_name)
+        self._pinned.add(key)
 
     def _generate(self, entity_type: str, original: str) -> str:
         f = self._faker

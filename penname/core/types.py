@@ -21,6 +21,7 @@ class MappingEntry:
     original: str
     pen_name: str
     entity_type: str
+    score: float = 1.0  # detection confidence, shown on the review screen
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,7 +34,12 @@ class Mapping:
         return {
             "version": 1,
             "entries": [
-                {"original": e.original, "pen_name": e.pen_name, "entity_type": e.entity_type}
+                {
+                    "original": e.original,
+                    "pen_name": e.pen_name,
+                    "entity_type": e.entity_type,
+                    "score": e.score,
+                }
                 for e in self.entries
             ],
         }
@@ -44,7 +50,9 @@ class Mapping:
             raise ValueError(f"unsupported mapping version: {data.get('version')!r}")
         return cls(
             entries=tuple(
-                MappingEntry(e["original"], e["pen_name"], e["entity_type"])
+                MappingEntry(
+                    e["original"], e["pen_name"], e["entity_type"], e.get("score", 1.0)
+                )
                 for e in data["entries"]
             )
         )
