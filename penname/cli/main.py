@@ -12,7 +12,7 @@ from pathlib import Path
 import tempfile
 
 from penname.core.engine import PennameSession, RoundTripError
-from penname.core.io.dispatch import pseudonymize_file
+from penname.core.io.dispatch import output_suffix_for, pseudonymize_file
 from penname.core.io.text import read_document, write_document
 from penname.core.mapping.crypto import MappingFileError
 from penname.core.mapping.store import MappingStore
@@ -60,8 +60,9 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _default_output(source: Path, suffix: str) -> Path:
-    return source.with_name(f"{source.stem}{suffix}{source.suffix}")
+def _default_output(source: Path) -> Path:
+    # PDF (and other read-only inputs) always export to Markdown.
+    return source.with_name(f"{source.stem}.pen{output_suffix_for(source)}")
 
 
 def _pseudonymize(args: argparse.Namespace) -> int:
@@ -70,7 +71,7 @@ def _pseudonymize(args: argparse.Namespace) -> int:
         print(f"Could not find the file: {source}", file=sys.stderr)
         return 1
 
-    dest = Path(args.output) if args.output else _default_output(source, ".pen")
+    dest = Path(args.output) if args.output else _default_output(source)
     mapping_path = (
         Path(args.mapping) if args.mapping else source.with_suffix(".pnmap")
     )

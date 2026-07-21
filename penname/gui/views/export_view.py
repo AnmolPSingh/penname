@@ -69,8 +69,12 @@ class ExportView(QWidget):
         self._suggested_name = ""
 
     def set_source_name(self, name: str) -> None:
-        stem, dot, suffix = name.rpartition(".")
-        self._suggested_name = f"{stem}.pen.{suffix}" if dot else f"{name}.pen"
+        from penname.core.io.dispatch import output_suffix_for
+
+        stem, dot, _ = name.rpartition(".")
+        # PDF (and other read-only inputs) export to Markdown, so suggest .md.
+        out_suffix = output_suffix_for(name).lstrip(".")
+        self._suggested_name = f"{stem}.pen.{out_suffix}" if dot else f"{name}.pen"
 
     def _choose_destination(self) -> None:
         path, _ = QFileDialog.getSaveFileName(

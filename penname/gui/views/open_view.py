@@ -11,7 +11,7 @@ from penname.gui.flow import SUPPORTED_SUFFIXES
 from penname.gui.theme import tokens as t
 
 _FILE_FILTER = (
-    "Documents (*.txt *.md *.csv *.xlsx *.docx);;All files (*)"
+    "Documents (*.txt *.md *.csv *.xlsx *.docx *.pdf);;All files (*)"
 )
 
 
@@ -44,9 +44,10 @@ class OpenView(QWidget):
 
         formats = QLabel(
             "Works with: Word (.docx), Excel (.xlsx), spreadsheets saved as CSV, "
-            "and plain text (.txt, .md).\n"
-            "PDFs are coming in a later version — for now, please copy the text "
-            "into a Word or text file first."
+            "plain text (.txt, .md), and PDFs.\n"
+            "For a PDF, Penname reads the text and gives you a Markdown copy. "
+            "Scanned PDFs (pictures of pages) can't be read yet — please copy "
+            "that text into a Word or text file first."
         )
         formats.setProperty("role", "helper")
         formats.setWordWrap(True)

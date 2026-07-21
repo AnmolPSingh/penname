@@ -8,8 +8,10 @@ no internet connection is used, ever.
 
 ## What it does
 
-1. **Open a document** (CSV, Excel, Word, or plain text). Penname finds names,
-   organizations, amounts, addresses, and other sensitive values.
+1. **Open a document** (CSV, Excel, Word, plain text, or PDF). Penname finds
+   names, organizations, amounts, addresses, and other sensitive values. For a
+   PDF, Penname reads the text and hands you a Markdown copy (scanned/image-only
+   PDFs aren't supported yet).
 2. **Review the list.** You decide what gets a pen name. Add anything Penname
    missed, remove anything it got wrong, and edit any pen name you like.
    **This review step matters — no tool catches everything.**

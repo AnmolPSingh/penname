@@ -14,7 +14,7 @@ from collections import Counter
 from pathlib import Path
 
 from penname.core.engine import PennameSession, RoundTripError
-from penname.core.io.dispatch import pseudonymize_file
+from penname.core.io.dispatch import output_suffix_for, pseudonymize_file
 from penname.core.io.text import write_document
 from penname.core.labels import entity_label
 from penname.core.mapping.crypto import MappingFileError
@@ -51,7 +51,7 @@ def pseudonymize_document(
         return {"success": False, "message": f"Could not find the file: {source}"}
 
     dest = Path(output_path) if output_path else source.with_name(
-        f"{source.stem}.pen{source.suffix}"
+        f"{source.stem}.pen{output_suffix_for(source)}"  # PDF -> Markdown
     )
     mapping_file = Path(mapping_path) if mapping_path else source.with_suffix(".pnmap")
 

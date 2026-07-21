@@ -9,7 +9,18 @@ from penname.core.io.csv_io import pseudonymize_csv
 from penname.core.io.text import read_document, write_document
 from penname.core.types import Mapping
 
-SUPPORTED_SUFFIXES = (".txt", ".md", ".csv", ".xlsx", ".docx")
+SUPPORTED_SUFFIXES = (".txt", ".md", ".csv", ".xlsx", ".docx", ".pdf")
+
+# Formats that can only be read, never written back in the same format. PDF is
+# extraction-only: its pseudonymized output is always Markdown.
+READ_ONLY_SUFFIXES = (".pdf",)
+
+
+def output_suffix_for(source: str | Path) -> str:
+    """The suffix a pseudonymized copy of this file should use. Read-only
+    inputs (PDF) always export to Markdown."""
+    suffix = Path(source).suffix.lower()
+    return ".md" if suffix in READ_ONLY_SUFFIXES else suffix
 
 
 def pseudonymize_file(
@@ -27,6 +38,12 @@ def pseudonymize_file(
         from penname.core.io.docx_io import pseudonymize_docx
 
         return pseudonymize_docx(source, dest, session)
+    if suffix == ".pdf":
+        from penname.core.io.pdf_io import extract_text
+
+        result = session.pseudonymize(extract_text(source))
+        write_document(dest, result.text)  # always Markdown; the PDF is not rewritten
+        return result.mapping
     result = session.pseudonymize(read_document(source))
     write_document(dest, result.text)
     return result.mapping
