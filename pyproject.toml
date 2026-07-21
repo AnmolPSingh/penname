@@ -19,6 +19,12 @@ dependencies = [
     "pypdf>=6.14.2",
 ]
 
+# GLiNER is an optional higher-recall NER backend. It pulls torch + a model,
+# so it is opt-in: the composite detector uses it when installed and falls back
+# to Presidio+spaCy when it is not. Install with:  uv sync --extra gliner
+[project.optional-dependencies]
+gliner = ["gliner>=0.2.13"]
+
 [project.scripts]
 penname = "penname.cli.main:main"
 penname-mcp = "penname.mcp.server:main"

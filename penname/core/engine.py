@@ -26,7 +26,7 @@ class PennameSession:
         generator: PenNameGenerator | None = None,
     ):
         if detector is None:
-            from penname.core.detect.presidio_detector import get_default_detector
+            from penname.core.detect.factory import get_default_detector
 
             detector = get_default_detector()
         self._detector = detector

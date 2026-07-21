@@ -30,7 +30,8 @@ Under UK/EU GDPR, pseudonymized data is still personal data.
 ## Privacy promises
 
 - **No network calls, ever.** No telemetry, no update checks, no cloud processing.
-  All language models ship inside the app.
+  All language models — including the GLiNER detection model — ship inside the
+  app and are loaded from local files only.
 - **Your mapping file is encrypted.** The file that links pen names back to real
   values is encrypted (AES-256-GCM) with a key kept in your operating system's
   keychain. It is never written to disk unprotected.
@@ -81,6 +82,26 @@ uv run penname reverse response.txt --mapping letter.pnmap -o restored.txt
 > `.pth` the interpreter skips, so the `penname` command may report
 > "No module named 'penname'". Run `uv run python -m penname …` instead, or
 > clone to a path without spaces. Installed releases and CI are unaffected.
+
+### Detection backends
+
+Detection is a composite: Microsoft Presidio (patterns for emails, phones,
+amounts, IDs, fund codes) plus spaCy for named entities. The released apps also
+bundle **GLiNER**, a higher-recall model for names, organizations, and places.
+
+GLiNER is an optional dependency (it pulls in PyTorch), so the base dev install
+uses Presidio + spaCy and the engine transparently falls back to that whenever
+GLiNER isn't present. To work with it locally:
+
+```bash
+uv sync --extra gliner                              # install GLiNER + torch
+uv run python -m penname.core.detect.gliner_model   # fetch the model (one-time)
+```
+
+The model is only ever downloaded by that fetch step; at runtime it loads from
+local files with the network disabled. (GLiNER can't be installed on Intel Macs
+— `onnxruntime` no longer ships Intel-Mac wheels — so on those the app runs
+Presidio + spaCy only.)
 
 ### Building the desktop app
 

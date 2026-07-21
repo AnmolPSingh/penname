@@ -32,6 +32,28 @@ for package in ("en_core_web_lg", "presidio_analyzer", "spacy", "thinc", "faker"
     binaries += pkg_binaries
     hiddenimports += pkg_hidden
 
+# Optional GLiNER backend: bundle it only when it is installed in the build
+# environment, so GLiNER-less builds (e.g. Intel macOS) still succeed. When
+# present, the app gains higher-recall detection — still fully offline.
+import importlib.util  # noqa: E402
+
+for package in ("gliner", "torch", "onnxruntime", "transformers", "tokenizers",
+                "sentencepiece", "huggingface_hub", "safetensors"):
+    if importlib.util.find_spec(package) is not None:
+        pkg_datas, pkg_binaries, pkg_hidden = collect_all(package)
+        datas += pkg_datas
+        binaries += pkg_binaries
+        hiddenimports += pkg_hidden
+
+# The fetched GLiNER model, if the build provisioned one. The release workflow
+# downloads it to this directory; resolve_model_path() finds it at runtime via
+# sys._MEIPASS/gliner_model. Nothing to bundle when the dir is absent.
+_model_dir = os.environ.get(
+    "PENNAME_GLINER_MODEL_DIR", os.path.join(PROJECT_ROOT, "gliner_model")
+)
+if os.path.isdir(_model_dir):
+    datas.append((_model_dir, "gliner_model"))
+
 # Collect the whole penname package explicitly: the entry point imports it
 # lazily (inside functions), which PyInstaller's static analysis would miss.
 hiddenimports += collect_submodules("penname")

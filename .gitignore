@@ -12,3 +12,6 @@ build/
 *.pnmap
 *.pen.*
 *.restored.*
+
+# Fetched GLiNER model (provisioned at build time, never committed)
+gliner_model/

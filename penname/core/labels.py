@@ -2,6 +2,7 @@
 
 ENTITY_LABELS = {
     "PERSON": "Name",
+    "ORGANIZATION": "Organization",
     "EMAIL_ADDRESS": "Email address",
     "PHONE_NUMBER": "Phone number",
     "DATE_TIME": "Date",

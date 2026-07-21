@@ -85,6 +85,8 @@ class PenNameGenerator:
         f = self._faker
         if entity_type == "PERSON":
             return f.name()
+        if entity_type == "ORGANIZATION":
+            return f.company()
         if entity_type == "EMAIL_ADDRESS":
             return f.email()
         if entity_type == "PHONE_NUMBER":
