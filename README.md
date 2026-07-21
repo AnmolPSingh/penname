@@ -1,4 +1,6 @@
-# Penname
+<p align="center">
+  <img src="brand/penname-logo.png" alt="Penname" width="360">
+</p>
 
 **Give the private details in your donor files a "pen name" before you share them
 with an AI assistant — then swap the real details back afterwards. Everything

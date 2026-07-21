@@ -1,0 +1,18 @@
+<svg viewBox="0 0 470 128" width="470" height="128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Penname">
+  <title>Penname</title>
+  <!-- Single-colour (ink) version for stamps, embossing, faxes, one-colour print.
+       Swap currentColor by setting `color` on the parent, or edit the fills. -->
+  <g fill="currentColor" color="#27251E">
+    <path fill="currentColor" fill-rule="evenodd" d="
+      M64 18 C 78 18 89 27 92 43 L 72 84 C 69.5 88.5 66.5 92.5 64 96
+      C 61.5 92.5 58.5 88.5 56 84 L 36 43 C 39 27 50 18 64 18 Z
+      M57.5 44 a6.5 6.5 0 1 0 13 0 a6.5 6.5 0 1 0 -13 0 Z
+      M62.4 52 L65.6 52 L65.6 87 A1.6 1.6 0 0 1 62.4 87 Z
+    "/>
+    <path fill="none" stroke="currentColor" stroke-width="4.6" stroke-linecap="round"
+          d="M39 110 C 51 103 58 116 68 109 C 76 103.5 84 106 90 111.5"/>
+    <text x="150" y="82" fill="currentColor" font-weight="600" letter-spacing="-1"
+          font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+          font-size="62">Penname</text>
+  </g>
+</svg>
