@@ -32,18 +32,17 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies incl. the GLiNER backend
-        run: uv sync --extra gliner
+      # The released binaries use Presidio+spaCy only. Bundling GLiNER pulls in
+      # PyTorch, which pushes the macOS app over GitHub's 2 GiB release-asset
+      # limit, so GLiNER ships as a source-install extra (uv sync --extra
+      # gliner) rather than in the download. The app falls back gracefully.
+      - name: Install dependencies
+        run: uv sync
 
       - name: Verify tests pass before building
         run: uv run pytest tests/test_round_trip.py -q
 
-      - name: Fetch the GLiNER model for offline bundling (build-time download)
-        run: uv run python -m penname.core.detect.gliner_model gliner_model
-
-      - name: Build the app (bundles spaCy + GLiNER + model, fully offline)
-        env:
-          PENNAME_GLINER_MODEL_DIR: gliner_model
+      - name: Build the app (bundles spaCy + models, fully offline)
         run: uv run pyinstaller packaging/penname.spec --noconfirm --distpath dist --workpath build
 
       - name: Smoke-test the frozen binary (offline detect + round-trip)

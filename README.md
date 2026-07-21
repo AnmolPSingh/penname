@@ -30,8 +30,7 @@ Under UK/EU GDPR, pseudonymized data is still personal data.
 ## Privacy promises
 
 - **No network calls, ever.** No telemetry, no update checks, no cloud processing.
-  All language models — including the GLiNER detection model — ship inside the
-  app and are loaded from local files only.
+  Every language model ships inside the app and is loaded from local files only.
 - **Your mapping file is encrypted.** The file that links pen names back to real
   values is encrypted (AES-256-GCM) with a key kept in your operating system's
   keychain. It is never written to disk unprotected.
@@ -86,12 +85,13 @@ uv run penname reverse response.txt --mapping letter.pnmap -o restored.txt
 ### Detection backends
 
 Detection is a composite: Microsoft Presidio (patterns for emails, phones,
-amounts, IDs, fund codes) plus spaCy for named entities. The released apps also
-bundle **GLiNER**, a higher-recall model for names, organizations, and places.
+amounts, IDs, fund codes) plus spaCy for named entities. An optional **GLiNER**
+backend adds higher-recall detection for names, organizations, and places.
 
-GLiNER is an optional dependency (it pulls in PyTorch), so the base dev install
-uses Presidio + spaCy and the engine transparently falls back to that whenever
-GLiNER isn't present. To work with it locally:
+The downloadable apps ship Presidio + spaCy only — bundling GLiNER pulls in
+PyTorch, which pushes the app past GitHub's 2 GB release limit. GLiNER is
+therefore a source-install extra; the engine transparently uses it when present
+and falls back to Presidio + spaCy when it isn't. To enable it locally:
 
 ```bash
 uv sync --extra gliner                              # install GLiNER + torch
