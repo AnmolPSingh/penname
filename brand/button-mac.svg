@@ -1,0 +1,12 @@
+<svg viewBox="0 0 320 64" width="320" height="64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Download for Mac">
+  <title>Download for Mac</title>
+  <rect x="1.5" y="1.5" width="317" height="61" rx="13" fill="#27251E" stroke="#016A71" stroke-width="2.4"/>
+  <!-- download arrow -->
+  <g transform="translate(38 20)" stroke="#FAF8F5" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 0 V15"/>
+    <path d="M3.5 8.5 L10 15 L16.5 8.5"/>
+    <path d="M0 23 H20"/>
+  </g>
+  <text x="74" y="40" fill="#FAF8F5" font-weight="600" font-size="21" letter-spacing="0.2"
+        font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">Download for Mac</text>
+</svg>

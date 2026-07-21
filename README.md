@@ -6,6 +6,13 @@
 with an AI assistant — then swap the real details back afterwards. Everything
 happens on your own computer.**
 
+<p align="center">
+  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-macos.zip"><img src="brand/button-mac.png" alt="Download for Mac" height="52"></a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-windows.zip"><img src="brand/button-windows.png" alt="Download for Windows" height="52"></a>
+</p>
+<p align="center"><sub>Free · runs entirely on your computer · <a href="../../releases/latest">all downloads &amp; checksums</a></sub></p>
+
 Penname is a free tool for fundraisers and nonprofit teams. If you'd like help
 from an AI assistant (like ChatGPT, Claude, or Copilot) to write a thank-you
 letter, tidy a spreadsheet, or summarise your notes — but you don't want to hand
@@ -82,13 +89,10 @@ Two promises we keep:
 
 ### 1. Download it
 
-Go to the [**Releases page**](../../releases/latest) and download the file for
-your computer:
-
-- **Mac:** `Penname-macos.zip`
-- **Windows:** `Penname-windows.zip`
-
-Double-click the downloaded `.zip` to unzip it.
+Click the button for your computer at the top of this page — **Download for
+Mac** or **Download for Windows** — or pick a file from the
+[Releases page](../../releases/latest). Then double-click the downloaded `.zip`
+to unzip it.
 
 ### 2. Open it for the first time
 
