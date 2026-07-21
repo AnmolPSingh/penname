@@ -1,0 +1,86 @@
+name: Release
+
+# Builds the desktop app for macOS and Windows on every version tag, publishes
+# SHA-256 checksums, and attaches SLSA build-provenance attestations. Builds are
+# unsigned (zero-budget); the README explains the Gatekeeper/SmartScreen prompts.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write        # create the release and upload assets
+  id-token: write        # provenance attestation signing
+  attestations: write    # record the provenance
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: Penname-macos.zip
+          - os: windows-latest
+            artifact: Penname-windows.zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (bundles the spaCy model, no runtime downloads)
+        run: uv sync
+
+      - name: Verify tests pass before building
+        run: uv run pytest tests/test_round_trip.py -q
+
+      - name: Build the app
+        run: uv run pyinstaller packaging/penname.spec --noconfirm --distpath dist --workpath build
+
+      - name: Smoke-test the frozen binary (offline detect + round-trip)
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            EXEC="dist/Penname.app/Contents/MacOS/Penname"
+          else
+            EXEC="dist/Penname/Penname.exe"
+          fi
+          QT_QPA_PLATFORM=offscreen "$EXEC" --self-test
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          xattr -cr dist/Penname.app
+          codesign --force --deep --sign - dist/Penname.app || true
+          ( cd dist && zip -qr Penname-macos.zip Penname.app )
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/Penname -DestinationPath dist/Penname-windows.zip
+
+      - name: SHA-256 checksum
+        shell: bash
+        run: |
+          cd dist
+          if command -v shasum >/dev/null; then
+            shasum -a 256 "${{ matrix.artifact }}" | tee "${{ matrix.artifact }}.sha256"
+          else
+            sha256sum "${{ matrix.artifact }}" | tee "${{ matrix.artifact }}.sha256"
+          fi
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: dist/${{ matrix.artifact }}
+
+      - name: Publish to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/${{ matrix.artifact }}
+            dist/${{ matrix.artifact }}.sha256

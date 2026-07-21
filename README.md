@@ -35,6 +35,39 @@ Under UK/EU GDPR, pseudonymized data is still personal data.
   values is encrypted (AES-256-GCM) with a key kept in your operating system's
   keychain. It is never written to disk unprotected.
 
+## Installing the app
+
+Download the file for your computer from the latest
+[release](../../releases): `Penname-macos.zip` or `Penname-windows.zip`.
+
+Penname is a free project with no budget for the code-signing certificates that
+stop the operating system from warning about new apps. The app is safe — you can
+verify it yourself (see "Verifying your download" below) — but you will see a
+warning the first time you open it. Here is how to get past it:
+
+**macOS.** Unzip, drag `Penname.app` to your Applications folder. The first time,
+**right-click the app and choose "Open"**, then click "Open" in the dialog.
+(Double-clicking shows a warning with no easy way through; right-click → Open
+does not.) You only need to do this once.
+
+**Windows.** Unzip the folder and run `Penname.exe`. Windows SmartScreen may say
+"Windows protected your PC" — click **"More info"**, then **"Run anyway"**.
+
+### Verifying your download
+
+Every release lists a **SHA-256 checksum** next to each file and a **build
+provenance attestation** proving the file was built by this repository's release
+workflow. To check the file you downloaded matches:
+
+```bash
+# macOS
+shasum -a 256 Penname-macos.zip
+# Windows (PowerShell)
+Get-FileHash Penname-windows.zip -Algorithm SHA256
+```
+
+Compare the result to the `.sha256` file published with the release.
+
 ## For developers
 
 ```bash
@@ -43,6 +76,21 @@ uv run pytest    # run the test suite — round-trip integrity is the gate
 uv run penname pseudonymize letter.txt -o letter.pen.txt --mapping letter.pnmap
 uv run penname reverse response.txt --mapping letter.pnmap -o restored.txt
 ```
+
+> If your project folder path contains a space, `uv`'s editable install writes a
+> `.pth` the interpreter skips, so the `penname` command may report
+> "No module named 'penname'". Run `uv run python -m penname …` instead, or
+> clone to a path without spaces. Installed releases and CI are unaffected.
+
+### Building the desktop app
+
+```bash
+bash packaging/build_app.sh    # macOS/Linux: builds dist/, prints the SHA-256
+```
+
+The build bundles the spaCy model, Presidio, and the CRM templates so the app
+runs fully offline. Releases for macOS and Windows are built automatically by
+`.github/workflows/release.yml` on every `v*` tag, with checksums and provenance.
 
 ### Optional MCP server (off by default)
 
