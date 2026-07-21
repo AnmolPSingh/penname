@@ -12,6 +12,10 @@ ENTITY_LABELS = {
     "IBAN_CODE": "Bank account",
     "IP_ADDRESS": "Computer address",
     "NRP": "Group or nationality",
+    "DONATION_AMOUNT": "Gift amount",
+    "WEALTH_RATING": "Wealth or capacity rating",
+    "FUND_CODE": "Fund or appeal code",
+    "CONSTITUENT_ID": "Constituent ID",
     "CUSTOM": "Added by you",
 }
 

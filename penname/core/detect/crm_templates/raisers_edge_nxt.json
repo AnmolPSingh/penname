@@ -1,0 +1,30 @@
+{
+  "source": "Raiser's Edge NXT",
+  "columns": {
+    "constituent id": "CONSTITUENT_ID",
+    "system record id": "CONSTITUENT_ID",
+    "lookup id": "CONSTITUENT_ID",
+    "name": "PERSON",
+    "full name": "PERSON",
+    "first name": "PERSON",
+    "last name": "PERSON",
+    "email": "EMAIL_ADDRESS",
+    "email address": "EMAIL_ADDRESS",
+    "phone": "PHONE_NUMBER",
+    "phone number": "PHONE_NUMBER",
+    "address": "LOCATION",
+    "address line 1": "LOCATION",
+    "city": "LOCATION",
+    "gift amount": "DONATION_AMOUNT",
+    "gift date": "DATE_TIME",
+    "total giving": "DONATION_AMOUNT",
+    "largest gift": "DONATION_AMOUNT",
+    "fund": "FUND_CODE",
+    "fund id": "FUND_CODE",
+    "appeal": "FUND_CODE",
+    "campaign": "FUND_CODE",
+    "wealth rating": "WEALTH_RATING",
+    "capacity rating": "WEALTH_RATING",
+    "estimated capacity": "WEALTH_RATING"
+  }
+}

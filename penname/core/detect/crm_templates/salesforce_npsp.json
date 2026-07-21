@@ -1,0 +1,23 @@
+{
+  "source": "Salesforce NPSP",
+  "columns": {
+    "contact id": "CONSTITUENT_ID",
+    "account id": "CONSTITUENT_ID",
+    "account name": "PERSON",
+    "full name": "PERSON",
+    "first name": "PERSON",
+    "last name": "PERSON",
+    "email": "EMAIL_ADDRESS",
+    "personal email": "EMAIL_ADDRESS",
+    "phone": "PHONE_NUMBER",
+    "mailing city": "LOCATION",
+    "mailing street": "LOCATION",
+    "amount": "DONATION_AMOUNT",
+    "opportunity amount": "DONATION_AMOUNT",
+    "total gifts": "DONATION_AMOUNT",
+    "close date": "DATE_TIME",
+    "campaign name": "FUND_CODE",
+    "gau allocation": "FUND_CODE",
+    "general accounting unit": "FUND_CODE"
+  }
+}

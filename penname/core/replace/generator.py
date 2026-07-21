@@ -106,11 +106,58 @@ class PenNameGenerator:
             return f.ipv4()
         if entity_type == "NRP":
             return f.country()
+        if entity_type == "DONATION_AMOUNT":
+            return self._reshape_amount(original)
+        if entity_type == "WEALTH_RATING":
+            return self._reshape_rating(original)
+        if entity_type in ("CONSTITUENT_ID", "FUND_CODE"):
+            return self._reshape_alphanumeric(original)
         return f.word().capitalize()
 
     def _reshape_digits(self, original: str) -> str:
         """Replace every digit, preserving punctuation and grouping."""
         return re.sub(r"\d", lambda _: str(self._faker.random_digit()), original)
+
+    def _reshape_alphanumeric(self, original: str) -> str:
+        """Replace letters with letters and digits with digits, keeping length,
+        separators, and case pattern (e.g. C-10041 -> C-48822)."""
+
+        def swap(match: re.Match) -> str:
+            char = match.group(0)
+            if char.isdigit():
+                return str(self._faker.random_digit())
+            return (
+                self._faker.random_uppercase_letter()
+                if char.isupper()
+                else self._faker.random_lowercase_letter()
+            )
+
+        return re.sub(r"[A-Za-z0-9]", swap, original)
+
+    def _reshape_rating(self, original: str) -> str:
+        """Capacity bands like "$50K-$100K" keep their $ and K/M/B units, only
+        the digits change; letter-only ratings (e.g. "Tier A") reshape letters."""
+        if any(c.isdigit() for c in original):
+            return self._reshape_digits(original)
+        return self._reshape_alphanumeric(original)
+
+    def _reshape_amount(self, original: str) -> str:
+        """Replace a currency amount with a different one of similar magnitude,
+        preserving the symbol and thousands grouping."""
+        match = re.search(r"\d[\d,]*(?:\.\d+)?", original)
+        if match is None:
+            return self._reshape_digits(original)
+        raw = match.group(0)
+        has_grouping = "," in raw
+        has_cents = "." in raw
+        value = float(raw.replace(",", ""))
+        factor = self._faker.random_int(60, 175) / 100  # 0.60x .. 1.75x
+        new_value = max(1.0, round(value * factor))
+        if has_cents:
+            rendered = f"{new_value:,.2f}" if has_grouping else f"{new_value:.2f}"
+        else:
+            rendered = f"{int(new_value):,}" if has_grouping else f"{int(new_value)}"
+        return original[: match.start()] + rendered + original[match.end() :]
 
     def _shift_date(self, original: str) -> str | None:
         for fmt in _DATE_FORMATS:

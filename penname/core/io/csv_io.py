@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
+from penname.core.detect.crm_templates import header_column_types
 from penname.core.engine import PennameSession, RoundTripError
 from penname.core.replace.applier import reverse_text
 from penname.core.types import Mapping, MappingEntry
@@ -22,15 +23,25 @@ def pseudonymize_csv(
     with open(source, newline="", encoding="utf-8") as f:
         rows = list(csv.reader(f))
 
+    # Only treat row 0 as a header when it actually matches a known CRM
+    # template; otherwise scan every row (a headerless export must not have
+    # its first data row silently skipped).
+    column_types = header_column_types(rows[0]) if rows else {}
+    has_header = bool(column_types)
+
     entries: dict[tuple[str, str], MappingEntry] = {}
     out_rows: list[list[str]] = []
-    # Every row is scanned, including a possible header row: cells without
-    # sensitive values pass through unchanged, and skipping row 0 blindly
-    # would silently leak real data from headerless files.
-    for row in rows:
+    for index, row in enumerate(rows):
+        if has_header and index == 0:
+            out_rows.append(row)  # column names are not donor data
+            continue
         out_row = []
-        for cell in row:
-            result = session.pseudonymize(cell)
+        for col, cell in enumerate(row):
+            entity_type = column_types.get(col)
+            if entity_type is not None:
+                result = session.pseudonymize_as(cell, entity_type)
+            else:
+                result = session.pseudonymize(cell)
             for entry in result.mapping.entries:
                 entries[(entry.entity_type, entry.original)] = entry
             out_row.append(result.text)

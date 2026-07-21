@@ -66,7 +66,22 @@ class PennameSession:
         return select_spans(spans)
 
     def pseudonymize(self, text: str) -> PseudonymizeResult:
-        spans = self._collect_spans(text)
+        return self._pseudonymize_spans(text, self._collect_spans(text))
+
+    def pseudonymize_as(self, text: str, entity_type: str) -> PseudonymizeResult:
+        """Treat the whole value as one entity of the given type.
+
+        Used for CRM columns whose header names the field (e.g. a
+        "Constituent ID" column), so a cell is pseudonymized even when its
+        value alone would not trigger detection."""
+        if not text.strip() or (entity_type, text) in self._ignored:
+            return PseudonymizeResult(text=text, mapping=Mapping(entries=()))
+        span = Span(0, len(text), entity_type, 1.0, text)
+        return self._pseudonymize_spans(text, [span])
+
+    def _pseudonymize_spans(
+        self, text: str, spans: list[Span]
+    ) -> PseudonymizeResult:
         if not spans:
             return PseudonymizeResult(text=text, mapping=Mapping(entries=()))
 

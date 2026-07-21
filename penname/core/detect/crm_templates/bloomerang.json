@@ -1,0 +1,22 @@
+{
+  "source": "Bloomerang",
+  "columns": {
+    "account number": "CONSTITUENT_ID",
+    "constituent id": "CONSTITUENT_ID",
+    "full name": "PERSON",
+    "first name": "PERSON",
+    "last name": "PERSON",
+    "primary email": "EMAIL_ADDRESS",
+    "email": "EMAIL_ADDRESS",
+    "primary phone": "PHONE_NUMBER",
+    "city": "LOCATION",
+    "street address": "LOCATION",
+    "transaction amount": "DONATION_AMOUNT",
+    "amount": "DONATION_AMOUNT",
+    "lifetime giving": "DONATION_AMOUNT",
+    "transaction date": "DATE_TIME",
+    "fund": "FUND_CODE",
+    "campaign": "FUND_CODE",
+    "appeal": "FUND_CODE"
+  }
+}

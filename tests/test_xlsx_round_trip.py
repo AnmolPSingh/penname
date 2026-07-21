@@ -66,16 +66,28 @@ def test_xlsx_replaces_names_and_preserves_formulas(
 def test_xlsx_refuses_pen_name_colliding_with_untouched_cell(tmp_path: Path) -> None:
     """A pen name that duplicates text in a cell detection never touched would
     be silently rewritten into the wrong donor's data on restore. The export
-    must refuse instead (verification covers unchanged cells too)."""
+    must refuse instead (verification covers unchanged cells too).
+
+    A stub detector pins exactly what is 'detected' so the untouched-cell
+    scenario is deterministic regardless of which recognizers are active."""
+    from penname.core.types import Span
+
+    class OnlyPersonDetector:
+        def detect(self, text: str) -> list[Span]:
+            idx = text.find("Priya Raghunathan")
+            if idx == -1:
+                return []
+            return [Span(idx, idx + 17, "PERSON", 1.0, "Priya Raghunathan")]
+
     wb = Workbook()
     ws = wb.active
     ws["A1"] = "Priya Raghunathan"
-    ws["A2"] = "ZQX-77"  # opaque code detection will not flag
+    ws["A2"] = "widgetsource"  # never detected -> stays as literal text
     path = tmp_path / "collide.xlsx"
     wb.save(path)
 
-    session = PennameSession()
-    session.set_pen_name("PERSON", "Priya Raghunathan", "ZQX-77")
+    session = PennameSession(detector=OnlyPersonDetector())
+    session.set_pen_name("PERSON", "Priya Raghunathan", "widgetsource")
 
     with pytest.raises(Exception):
         pseudonymize_xlsx(path, tmp_path / "out.xlsx", session)

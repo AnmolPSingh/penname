@@ -1,0 +1,23 @@
+{
+  "source": "Little Green Light",
+  "columns": {
+    "lgl id": "CONSTITUENT_ID",
+    "constituent id": "CONSTITUENT_ID",
+    "name": "PERSON",
+    "first name": "PERSON",
+    "last name": "PERSON",
+    "email address": "EMAIL_ADDRESS",
+    "email": "EMAIL_ADDRESS",
+    "phone number": "PHONE_NUMBER",
+    "city": "LOCATION",
+    "street": "LOCATION",
+    "gift amount": "DONATION_AMOUNT",
+    "amount": "DONATION_AMOUNT",
+    "gift date": "DATE_TIME",
+    "received date": "DATE_TIME",
+    "fund": "FUND_CODE",
+    "campaign": "FUND_CODE",
+    "appeal": "FUND_CODE",
+    "category": "FUND_CODE"
+  }
+}

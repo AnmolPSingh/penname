@@ -20,8 +20,12 @@ class PresidioDetector:
         from presidio_analyzer import AnalyzerEngine
         from presidio_analyzer.nlp_engine import NlpEngineProvider
 
+        from penname.core.detect.sector_recognizers import build_sector_recognizers
+
         provider = NlpEngineProvider(nlp_configuration=_NLP_CONFIGURATION)
         self._analyzer = AnalyzerEngine(nlp_engine=provider.create_engine())
+        for recognizer in build_sector_recognizers():
+            self._analyzer.registry.add_recognizer(recognizer)
         self._min_score = min_score
 
     def detect(self, text: str) -> list[Span]:

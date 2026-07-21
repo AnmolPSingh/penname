@@ -1,0 +1,21 @@
+{
+  "source": "DonorPerfect",
+  "columns": {
+    "donor id": "CONSTITUENT_ID",
+    "dp id": "CONSTITUENT_ID",
+    "donor name": "PERSON",
+    "first name": "PERSON",
+    "last name": "PERSON",
+    "email": "EMAIL_ADDRESS",
+    "home phone": "PHONE_NUMBER",
+    "mobile phone": "PHONE_NUMBER",
+    "address": "LOCATION",
+    "city": "LOCATION",
+    "gift amount": "DONATION_AMOUNT",
+    "gift date": "DATE_TIME",
+    "general ledger": "FUND_CODE",
+    "gl code": "FUND_CODE",
+    "campaign": "FUND_CODE",
+    "solicitation": "FUND_CODE"
+  }
+}
