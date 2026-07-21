@@ -15,10 +15,12 @@ dependencies = [
     "openpyxl>=3.1.5",
     "python-docx>=1.2.0",
     "pyside6>=6.11.1",
+    "mcp>=1.28.1",
 ]
 
 [project.scripts]
 penname = "penname.cli.main:main"
+penname-mcp = "penname.mcp.server:main"
 
 [project.gui-scripts]
 penname-gui = "penname.gui.app:main"

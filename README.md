@@ -42,4 +42,20 @@ uv run penname pseudonymize letter.txt -o letter.pen.txt --mapping letter.pnmap
 uv run penname reverse response.txt --mapping letter.pnmap -o restored.txt
 ```
 
+### Optional MCP server (off by default)
+
+Penname ships an MCP server so a local AI agent can pseudonymize documents and
+take pen names off replies. It is **disabled by default** — turn it on
+explicitly:
+
+```bash
+python -m penname.mcp.config enable    # opt in (writes ~/.penname/settings.json)
+penname-mcp                            # starts the server over stdio
+```
+
+It exposes two tools: `pseudonymize_document` (returns file paths and counts,
+never raw content) and `reverse_to_file` (writes the restored text to a local
+file and returns **only** a success flag and the path — restored donor data is
+never returned into the model's context).
+
 Licensed under Apache-2.0.
