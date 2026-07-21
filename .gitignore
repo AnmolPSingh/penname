@@ -15,3 +15,6 @@ build/
 
 # Fetched GLiNER model (provisioned at build time, never committed)
 gliner_model/
+
+# Internal agent build-instructions — kept local, not published
+CLAUDE.md
