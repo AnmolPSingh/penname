@@ -17,12 +17,32 @@ from penname.core.replace.applier import reverse_text
 from penname.core.types import Mapping, MappingEntry
 
 
-def _iter_paragraphs(doc: Document):
-    yield from doc.paragraphs
-    for table in doc.tables:
+def _paragraphs_in(container):
+    """Every paragraph in a body/header/footer, including those inside tables."""
+    yield from container.paragraphs
+    for table in container.tables:
         for row in table.rows:
             for cell in row.cells:
                 yield from cell.paragraphs
+
+
+def _iter_paragraphs(doc: Document):
+    """All paragraphs including headers and footers — donor letterhead and
+    reply-to lines live there and must not be skipped. Headers/footers that are
+    linked to the previous section share the same underlying part, so they are
+    skipped to avoid processing (and re-pseudonymizing) the same text twice."""
+    yield from _paragraphs_in(doc)
+    for section in doc.sections:
+        for hdrftr in (
+            section.header,
+            section.footer,
+            section.first_page_header,
+            section.first_page_footer,
+            section.even_page_header,
+            section.even_page_footer,
+        ):
+            if not hdrftr.is_linked_to_previous:
+                yield from _paragraphs_in(hdrftr)
 
 
 def _rewrite(paragraph: Paragraph, new_text: str) -> None:

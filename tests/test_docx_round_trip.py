@@ -52,6 +52,29 @@ def test_docx_text_round_trips(document_path: Path, tmp_path: Path) -> None:
         assert reverse_text(pen, mapping) == original
 
 
+def test_docx_headers_and_footers_are_pseudonymized(tmp_path: Path) -> None:
+    """Donor letterhead and reply-to lines live in headers/footers — they must
+    be pseudonymized, not silently passed through."""
+    doc = Document()
+    doc.sections[0].header.paragraphs[0].text = "Riverside Foundation — Margaret Wilson"
+    doc.add_paragraph("Thank you for your generous gift.")
+    doc.sections[0].footer.paragraphs[0].text = "Reply to s.chen@riversidecf.org"
+    source = tmp_path / "letter.docx"
+    doc.save(source)
+    out = tmp_path / "letter.pen.docx"
+
+    mapping = pseudonymize_docx(source, out, PennameSession())
+
+    pen = Document(str(out))
+    header = pen.sections[0].header.paragraphs[0].text
+    footer = pen.sections[0].footer.paragraphs[0].text
+    assert "Margaret Wilson" not in header
+    assert "s.chen@riversidecf.org" not in footer
+    # and both reverse cleanly
+    assert reverse_text(header, mapping) == "Riverside Foundation — Margaret Wilson"
+    assert reverse_text(footer, mapping) == "Reply to s.chen@riversidecf.org"
+
+
 def test_docx_structure_preserved_and_names_replaced(
     document_path: Path, tmp_path: Path
 ) -> None:
