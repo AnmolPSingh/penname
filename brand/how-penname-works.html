@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>How Penname works</title>
+<meta name="hz:slide-selector" content=".infographic" />
+<meta name="hz:canvas-width" content="1600" />
+<meta name="hz:canvas-height" content="940" />
+<link rel="stylesheet" href="https://use.typekit.net/pym1ihk.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#e8e6e2; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+
+.infographic {
+  position:relative; width:1600px; height:940px; overflow:hidden;
+  background:#faf8f5; color:#27251e;
+  font-family:"poppins", sans-serif; font-weight:400;
+}
+
+/* ---- header ---- */
+.brand { position:absolute; left:72px; top:62px; display:flex; align-items:center; gap:13px; }
+.nib { width:38px; height:38px; display:block; }
+.brand .name { font-size:32px; font-weight:500; letter-spacing:-0.4px; }
+.by { position:absolute; right:72px; top:62px; text-align:right; }
+.by .kicker { font-size:16px; color:#72706b; margin-bottom:8px; }
+.by img { height:24px; width:auto; display:block; margin-left:auto; }
+.rule { position:absolute; left:72px; right:72px; top:146px; height:1px; background:#d1d1cd; }
+
+/* ---- headline ---- */
+.head { position:absolute; left:72px; top:188px; width:1200px; }
+.head h1 { font-size:54px; font-weight:500; line-height:1.08; letter-spacing:-1.1px; }
+.head h1 em { font-style:normal; color:#016a71; }
+.head p { margin-top:20px; font-size:21px; line-height:1.5; color:#72706b; width:1190px; }
+
+/* ---- the round trip ---- */
+.stage { position:absolute; top:448px; width:316px; }
+.chip { display:inline-block; padding:13px 20px; border-radius:999px;
+        font-size:22px; font-weight:500; letter-spacing:-0.2px; white-space:nowrap; }
+.chip.real { background:#fdfbfa; border:1px solid #d1d1cd; color:#27251e; }
+.chip.pen  { background:#016a71; border:1px solid #016a71; color:#ffffff; }
+.cap { margin-top:12px; font-size:16px; line-height:1.4; color:#72706b; }
+
+/* ---- spine ---- */
+.spine { position:absolute; left:72px; right:72px; top:578px; height:1px; background:#d1d1cd; }
+.chev { position:absolute; top:566px; color:#d1d1cd; font-size:26px; line-height:1;
+          font-weight:400; }
+.marker { position:absolute; top:556px; width:44px; height:44px; border-radius:999px;
+          background:#faf8f5; border:1px solid #016a71; color:#016a71;
+          font-size:20px; font-weight:500; display:flex; align-items:center; justify-content:center; }
+
+/* ---- steps: titles occupy a reserved block so every body starts level ---- */
+.step { position:absolute; top:634px; width:316px; }
+.step h2 { font-size:27px; font-weight:500; letter-spacing:-0.4px; line-height:1.18;
+           min-height:44px; }
+.step p { font-size:18.5px; line-height:1.5; color:#72706b; }
+
+/* ---- footer ---- */
+.foot { position:absolute; left:72px; right:72px; bottom:50px; }
+.foot .frule { height:1px; background:#d1d1cd; margin-bottom:20px; }
+.foot .cols { display:flex; justify-content:space-between; align-items:flex-start; gap:56px; }
+.foot .note { font-size:16px; line-height:1.5; color:#72706b; max-width:860px; }
+.foot .note b { font-weight:500; color:#27251e; }
+.foot .meta { font-size:15px; line-height:1.6; color:#72706b; text-align:right; white-space:nowrap; }
+</style>
+</head>
+<body>
+<div class="infographic" data-canvas-width="1600" data-canvas-height="940">
+
+  <div class="brand"><svg class="nib" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" aria-label="Penname">
+  <path fill="#27251E" fill-rule="evenodd" d="M64 18 C 78 18 89 27 92 43 L 72 84 C 69.5 88.5 66.5 92.5 64 96 C 61.5 92.5 58.5 88.5 56 84 L 36 43 C 39 27 50 18 64 18 Z M57.5 44 a6.5 6.5 0 1 0 13 0 a6.5 6.5 0 1 0 -13 0 Z M62.4 52 L65.6 52 L65.6 87 A1.6 1.6 0 0 1 62.4 87 Z"/>
+  <path fill="none" stroke="#016A71" stroke-width="4.6" stroke-linecap="round" d="M39 110 C 51 103 58 116 68 109 C 76 103.5 84 106 90 111.5"/>
+</svg><span class="name">Penname</span></div>
+  <div class="by">
+    <div class="kicker">A free, open-source tool for nonprofits by</div>
+    <img src="data:image/png;base64,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" alt="Philanthropel" width="440" height="60" />
+  </div>
+  <div class="rule"></div>
+
+  <div class="head">
+    <h1>Give donor data a <em>pen name</em><br />before you share it with AI.</h1>
+    <p>Penname finds the sensitive values in your documents, swaps them for realistic stand-ins,
+       and puts the real ones back afterwards. Everything happens on your own computer.</p>
+  </div>
+
+  <div class="stage" style="left:72px"><div class="chip real">Margaret Wilson</div><div class="cap">the real value in your document</div></div><div class="stage" style="left:430px"><div class="chip pen">Dorothy Fields</div><div class="cap">the pen name, approved by you</div></div><div class="stage" style="left:788px"><div class="chip pen">Dorothy Fields</div><div class="cap">all the AI assistant ever sees</div></div><div class="stage" style="left:1146px"><div class="chip real">Margaret Wilson</div><div class="cap">restored, on your computer only</div></div>
+  <div class="spine"></div><div class="chev" style="left:368px">&rsaquo;</div><div class="chev" style="left:726px">&rsaquo;</div><div class="chev" style="left:1084px">&rsaquo;</div>
+  <div class="marker" style="left:220px">1</div><div class="marker" style="left:578px">2</div><div class="marker" style="left:936px">3</div><div class="marker" style="left:1294px">4</div>
+  <div class="step" style="left:72px"><h2>Open</h2><p>Open a Word, Excel, CSV, text or PDF file. Nothing is uploaded.</p></div><div class="step" style="left:430px"><h2>Review</h2><p>Penname suggests a pen name for every value it finds. You check each one. This step is never skipped.</p></div><div class="step" style="left:788px"><h2>Export</h2><p>Save the pen-named copy and paste it into your AI assistant. The encrypted key file stays with you.</p></div><div class="step" style="left:1146px"><h2>Take the pen names off</h2><p>Paste the reply back. Penname restores the real values to a file on your computer.</p></div>
+
+  <div class="foot">
+    <div class="frule"></div>
+    <div class="cols">
+      <div class="note"><b>Penname reduces the personal data you share. It does not make data anonymous.</b>
+        No tool finds everything, which is why the review step is required.</div>
+      <div class="meta">© 2026 Philanthropel Limited · Apache-2.0<br />github.com/AnmolPSingh/penname</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

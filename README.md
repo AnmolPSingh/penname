@@ -60,6 +60,10 @@ machine.
 
 ## What Penname does, in plain terms
 
+<div align="center">
+  <img src="brand/how-penname-works.png" alt="How Penname works: open your document, review every pen name, export the pen-named copy for your AI assistant, then take the pen names off to restore the real values. Everything happens on your own computer." width="900">
+</div>
+
 Say your file contains this line:
 
 > Margaret Wilson gave $25,000 to the FY25-CLEANWATER appeal. Reach her at
