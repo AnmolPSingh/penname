@@ -41,14 +41,13 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
 
-      # Full suite incl. the PySide6 GUI tests + the 80% coverage gate. The GUI
-      # tests are reliable on macOS but flake in headless Linux/Windows CI, so
-      # this step is the blocking gate on macOS and reports-but-doesn't-block
-      # elsewhere. Cross-platform safety nets remain: the round-trip integrity
-      # gate above blocks on every OS, and the release workflow's frozen
-      # --self-test launches and round-trips the built app on macOS AND Windows.
+      # Full suite incl. the PySide6 GUI tests + the 80% coverage gate, blocking
+      # on every OS. This used to be advisory off macOS because the suite failed
+      # on Linux/Windows; the cause was never the GUI, it was that CI runners
+      # have no OS keychain, so every test that saves a mapping hit the
+      # (correct) refusal in penname.core.mapping.keychain. The tests now supply
+      # their own in-process key store, so all three platforms really gate.
       - name: Full test suite with coverage
-        continue-on-error: ${{ runner.os != 'macOS' }}
         shell: bash
         run: |
           if [ "${{ runner.os }}" = "Linux" ]; then

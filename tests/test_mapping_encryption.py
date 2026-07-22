@@ -83,3 +83,25 @@ def test_default_key_comes_from_keychain(monkeypatch, tmp_path: Path) -> None:
     loaded = MappingStore().load(target)  # and a fresh store finds the same key
     assert loaded == _mapping()
     assert len(vault) == 1  # reused, not recreated
+
+
+def test_guard_refuses_insecure_keyring_backends() -> None:
+    """Rule 6: the mapping key must live in a real OS keychain.
+
+    This is the control that stops Penname writing an encryption key into a
+    plaintext file when no keychain exists. It had no coverage until the CI
+    matrix failed on it, so it is pinned here.
+    """
+    import keyring
+    import keyring.backends.fail
+    import pytest
+
+    from penname.core.mapping.keychain import KeychainError, get_or_create_key
+
+    previous = keyring.get_keyring()
+    try:
+        keyring.set_keyring(keyring.backends.fail.Keyring())
+        with pytest.raises(KeychainError, match="no secure keychain"):
+            get_or_create_key()
+    finally:
+        keyring.set_keyring(previous)
