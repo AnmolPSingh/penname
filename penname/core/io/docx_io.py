@@ -13,6 +13,7 @@ from docx import Document
 from docx.text.paragraph import Paragraph
 
 from penname.core.engine import PennameSession, RoundTripError
+from penname.core.io.limits import check_zip_bomb
 from penname.core.replace.applier import reverse_text
 from penname.core.types import Mapping, MappingEntry
 
@@ -57,6 +58,7 @@ def _rewrite(paragraph: Paragraph, new_text: str) -> None:
 def pseudonymize_docx(
     source: str | Path, dest: str | Path, session: PennameSession
 ) -> Mapping:
+    check_zip_bomb(source)  # docx is a zip; refuse decompression bombs
     doc = Document(str(source))
     entries: dict[tuple[str, str], MappingEntry] = {}
     # Every paragraph, changed or not: untouched text must also survive the

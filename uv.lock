@@ -1596,10 +1596,11 @@ wheels = [
 
 [[package]]
 name = "penname"
-version = "2.0.0"
+version = "2.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
+    { name = "defusedxml" },
     { name = "en-core-web-lg" },
     { name = "faker" },
     { name = "keyring" },
@@ -1629,6 +1630,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "cryptography", specifier = ">=43" },
+    { name = "defusedxml", specifier = ">=0.7" },
     { name = "en-core-web-lg", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" },
     { name = "faker", specifier = ">=30" },
     { name = "gliner", marker = "extra == 'gliner'", specifier = ">=0.2.13" },

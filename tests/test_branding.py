@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_version_is_2() -> None:
-    assert penname.__version__ == "2.0.0"
+    assert penname.__version__ == "2.0.1"
 
 
 def test_attribution_constants() -> None:
@@ -63,7 +63,7 @@ def test_about_view_shows_version_and_copyright(qtbot) -> None:
     view = AboutView()
     qtbot.addWidget(view)
     joined = " ".join(w.text() for w in view.findChildren(QLabel))
-    assert "2.0.0" in joined
+    assert "2.0.1" in joined
     assert "Philanthropel Limited" in joined
 
 

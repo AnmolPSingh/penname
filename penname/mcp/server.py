@@ -34,21 +34,32 @@ def build_server(require_enabled: bool = True):
         input_path: str,
         output_path: str | None = None,
         mapping_path: str | None = None,
+        overwrite: bool = False,
     ) -> dict:
         """Give sensitive values in a local document a pen name before it is
         shared with a model. Writes a pseudonymized copy and an encrypted
-        mapping file, and returns their paths plus counts by type. Always
-        review the pseudonymized file before sharing it."""
-        return tools.pseudonymize_document(input_path, output_path, mapping_path)
+        mapping file (inside the input file's folder) and returns their paths
+        plus counts by type. Existing files are not overwritten unless
+        overwrite=true. Always review the pseudonymized file before sharing it."""
+        return tools.pseudonymize_document(
+            input_path, output_path, mapping_path, overwrite
+        )
 
     @server.tool()
     def reverse_to_file(
-        response_text: str, mapping_path: str, output_path: str
+        response_text: str,
+        mapping_path: str,
+        output_path: str,
+        overwrite: bool = False,
     ) -> dict:
         """Take the pen names off a model's reply and save the restored text to
-        a local file. Returns only a success flag and the file path — the
-        restored content is deliberately never returned into model context."""
-        return tools.reverse_to_file(response_text, mapping_path, output_path)
+        a local file (inside the mapping file's folder). Returns only a success
+        flag and the file path — the restored content is deliberately never
+        returned into model context. Existing files are not overwritten unless
+        overwrite=true."""
+        return tools.reverse_to_file(
+            response_text, mapping_path, output_path, overwrite
+        )
 
     return server
 

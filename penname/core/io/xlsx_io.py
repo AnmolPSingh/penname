@@ -12,6 +12,7 @@ from openpyxl import load_workbook
 
 from penname.core.detect.crm_templates import header_column_types
 from penname.core.engine import PennameSession, RoundTripError
+from penname.core.io.limits import check_zip_bomb
 from penname.core.replace.applier import reverse_text
 from penname.core.types import Mapping, MappingEntry
 
@@ -51,6 +52,7 @@ def _coerce_like(original, pen_text: str):
 def pseudonymize_xlsx(
     source: str | Path, dest: str | Path, session: PennameSession
 ) -> Mapping:
+    check_zip_bomb(source)  # xlsx is a zip; refuse decompression bombs
     workbook = load_workbook(source)
     entries: dict[tuple[str, str], MappingEntry] = {}
     # Every text cell, changed or not: untouched cells must also survive the

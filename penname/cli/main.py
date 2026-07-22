@@ -13,6 +13,7 @@ import tempfile
 
 from penname.core.engine import PennameSession, RoundTripError
 from penname.core.io.dispatch import output_suffix_for, pseudonymize_file
+from penname.core.io.limits import InputTooLargeError
 from penname.core.io.text import read_document, write_document
 from penname.core.mapping.crypto import MappingFileError
 from penname.core.mapping.store import MappingStore
@@ -140,11 +141,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "pseudonymize":
             return _pseudonymize(args)
         return _reverse(args)
-    except MappingFileError as exc:
+    except (MappingFileError, RoundTripError, InputTooLargeError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    except RoundTripError as exc:
-        print(str(exc), file=sys.stderr)
+    except Exception:  # fail safely on a malformed file rather than crash
+        print(
+            "Sorry — Penname could not process that file. It may be corrupted or "
+            "in an unexpected format.",
+            file=sys.stderr,
+        )
         return 1
 
 

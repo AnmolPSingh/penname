@@ -6,6 +6,7 @@ from pathlib import Path
 
 from penname.core.engine import PennameSession
 from penname.core.io.csv_io import pseudonymize_csv
+from penname.core.io.limits import check_file_size
 from penname.core.io.text import read_document, write_document
 from penname.core.types import Mapping
 
@@ -27,6 +28,7 @@ def pseudonymize_file(
     source: str | Path, dest: str | Path, session: PennameSession
 ) -> Mapping:
     source = Path(source)
+    check_file_size(source)  # refuse oversized input before any parser runs
     suffix = source.suffix.lower()
     if suffix == ".csv":
         return pseudonymize_csv(source, dest, session)

@@ -126,9 +126,10 @@ def test_reverse_with_unexpected_error_returns_generic_message(tmp_path, monkeyp
         raise RuntimeError("SECRET Margaret Wilson leaked in exception text")
 
     monkeypatch.setattr(tools.MappingStore, "load", boom)
+    mapping = tmp_path / "m.pnmap"  # same folder as the output, so the path check passes
     dest = tmp_path / "out.txt"
 
-    result = tools.reverse_to_file("text", "whatever.pnmap", str(dest))
+    result = tools.reverse_to_file("text", str(mapping), str(dest))
 
     assert result["success"] is False
     assert result["message"] == "An internal error occurred."

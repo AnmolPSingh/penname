@@ -7,9 +7,9 @@ with an AI assistant — then swap the real details back afterwards. Everything
 happens on your own computer.**
 
 <p align="center">
-  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-macos.zip"><img src="brand/button-mac.png" alt="Download for Mac" height="52"></a>
+  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname.dmg"><img src="brand/button-mac.png" alt="Download for Mac" height="52"></a>
   &nbsp;&nbsp;
-  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-windows.zip"><img src="brand/button-windows.png" alt="Download for Windows" height="52"></a>
+  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-Setup.exe"><img src="brand/button-windows.png" alt="Download for Windows" height="52"></a>
 </p>
 <p align="center"><sub>A free, open-source tool for nonprofits, by <b>Philanthropel</b> · runs entirely on your computer · <a href="../../releases/latest">all downloads &amp; checksums</a></sub></p>
 
@@ -90,9 +90,15 @@ Two promises we keep:
 ### 1. Download it
 
 Click the button for your computer at the top of this page — **Download for
-Mac** or **Download for Windows** — or pick a file from the
-[Releases page](../../releases/latest). Then double-click the downloaded `.zip`
-to unzip it.
+Mac** (a `.dmg`) or **Download for Windows** (a `Setup.exe` installer). You can
+also pick a file, including plain `.zip` versions, from the
+[Releases page](../../releases/latest).
+
+**On a Mac:** open the downloaded `Penname.dmg` and drag **Penname** into your
+**Applications** folder.
+
+**On Windows:** run the downloaded **`Penname-Setup.exe`** and follow the short
+installer — it adds Penname to your Start menu.
 
 ### 2. Open it for the first time
 
@@ -102,9 +108,11 @@ computer will show a caution message the **first** time you open it. Here's how
 to get past it (you only do this once):
 
 **On a Mac**
-1. Move `Penname` to your **Applications** folder.
-2. **Right-click** (or Control-click) the Penname icon and choose **Open**.
-3. A message appears asking if you're sure — click **Open**.
+1. In your Applications folder, **right-click** (or Control-click) the Penname
+   icon and choose **Open**.
+2. A message appears asking if you're sure — click **Open**.
+3. If macOS still won't open it, go to **System Settings → Privacy & Security**,
+   scroll down, and click **Open Anyway** next to Penname.
 
 > Tip: right-click → Open works even when a plain double-click doesn't. After the
 > first time, you can open Penname normally.
@@ -113,12 +121,16 @@ _[Screenshot of the Mac "are you sure you want to open it" message goes here —
 capture this on your Mac the first time you open Penname.]_
 
 **On Windows**
-1. Open the unzipped folder and double-click **`Penname.exe`**.
-2. If a blue "Windows protected your PC" box appears, click **More info**, then
-   **Run anyway**.
+1. When you run `Penname-Setup.exe`, a blue "Windows protected your PC" box may
+   appear. Click **More info**, then **Run anyway**.
+2. Finish the installer, then open **Penname** from the Start menu.
 
 _[Screenshot of the Windows "More info / Run anyway" message goes here — capture
 this on your PC the first time you open Penname.]_
+
+> Prefer package managers? On a Mac you can also install with Homebrew once a
+> tap is set up (no warning to click through); on Windows, via Scoop or winget.
+> Ask if you'd like these set up.
 
 ### 3. (Optional) Check your download is genuine
 
