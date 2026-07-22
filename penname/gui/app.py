@@ -8,6 +8,7 @@ from __future__ import annotations
 import sys
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -21,22 +22,25 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from penname.gui.assets import asset_path
 from penname.gui.flow import DocumentFlow
 from penname.gui.theme import tokens as t
 from penname.gui.theme.qss import build_stylesheet
+from penname.gui.views.about_view import AboutView
 from penname.gui.views.export_view import ExportView
 from penname.gui.views.open_view import OpenView
 from penname.gui.views.review_view import ReviewView
 from penname.gui.views.reverse_view import ReverseView
 
 NAV_ITEMS = ("1.  Open", "2.  Review", "3.  Export", "Take pen names off")
-PAGE_OPEN, PAGE_REVIEW, PAGE_EXPORT, PAGE_REVERSE = range(4)
+PAGE_OPEN, PAGE_REVIEW, PAGE_EXPORT, PAGE_REVERSE, PAGE_ABOUT = range(5)
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Penname")
+        self.setWindowIcon(QIcon(asset_path("penname-icon.png")))
         self.resize(1100, 720)
 
         self.flow = DocumentFlow(self)
@@ -54,7 +58,14 @@ class MainWindow(QMainWindow):
         self.review_view = ReviewView()
         self.export_view = ExportView()
         self.reverse_view = ReverseView()
-        for view in (self.open_view, self.review_view, self.export_view, self.reverse_view):
+        self.about_view = AboutView()
+        for view in (
+            self.open_view,
+            self.review_view,
+            self.export_view,
+            self.reverse_view,
+            self.about_view,
+        ):
             self.pages.addWidget(view)
         root.addWidget(self.pages, 1)
 
@@ -96,10 +107,34 @@ class MainWindow(QMainWindow):
         self.nav_group.idClicked.connect(self._go_to)
 
         layout.addStretch(1)
+
+        about_button = QPushButton("About Penname")
+        about_button.setProperty("role", "nav")
+        about_button.setCursor(Qt.PointingHandCursor)
+        about_button.clicked.connect(lambda: self._go_to(PAGE_ABOUT))
+        layout.addWidget(about_button)
+
         offline = QLabel("Everything stays on this computer.")
         offline.setProperty("role", "helper")
         offline.setWordWrap(True)
         layout.addWidget(offline)
+
+        # Attribution: a free, open-source tool by Philanthropel.
+        credit = QHBoxLayout()
+        credit.setSpacing(t.SPACE_8)
+        credit.setContentsMargins(0, t.SPACE_8, 0, 0)
+        mark = QLabel()
+        pm = QPixmap(asset_path("philanthropel-mnemonic.png"))
+        if not pm.isNull():
+            mark.setPixmap(pm.scaledToHeight(18, Qt.SmoothTransformation))
+        credit.addWidget(mark)
+        by = QLabel("by Philanthropel")
+        by.setProperty("role", "helper")
+        credit.addWidget(by)
+        credit.addStretch(1)
+        credit_row = QWidget()
+        credit_row.setLayout(credit)
+        layout.addWidget(credit_row)
         return sidebar
 
     # -- wiring ------------------------------------------------------------
@@ -117,7 +152,8 @@ class MainWindow(QMainWindow):
 
     def _go_to(self, page: int) -> None:
         self.pages.setCurrentIndex(page)
-        self.nav_buttons[page].setChecked(True)
+        if page < len(self.nav_buttons):  # About has no numbered nav button
+            self.nav_buttons[page].setChecked(True)
 
     def _set_step_enabled(self, page: int, enabled: bool) -> None:
         self.nav_buttons[page].setEnabled(enabled)

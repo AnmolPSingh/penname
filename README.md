@@ -11,7 +11,7 @@ happens on your own computer.**
   &nbsp;&nbsp;
   <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-windows.zip"><img src="brand/button-windows.png" alt="Download for Windows" height="52"></a>
 </p>
-<p align="center"><sub>Free · runs entirely on your computer · <a href="../../releases/latest">all downloads &amp; checksums</a></sub></p>
+<p align="center"><sub>A free, open-source tool for nonprofits, by <b>Philanthropel</b> · runs entirely on your computer · <a href="../../releases/latest">all downloads &amp; checksums</a></sub></p>
 
 Penname is a free tool for fundraisers and nonprofit teams. If you'd like help
 from an AI assistant (like ChatGPT, Claude, or Copilot) to write a thank-you
@@ -259,4 +259,25 @@ Compare the result to the `.sha256` file published with the release.
 
 ---
 
-Licensed under Apache-2.0.
+## A free, open-source tool for nonprofits, by Philanthropel
+
+<p align="center">
+  <img src="brand/philanthropel-logo.png" alt="Philanthropel" width="240">
+</p>
+
+Penname is made and maintained by **Philanthropel**, and given freely to the
+nonprofit and philanthropy community.
+
+**© 2026 Philanthropel Limited.**
+
+### License & trademarks
+
+- **The code is open source**, licensed under the **Apache License, Version 2.0**
+  (see [`LICENSE`](LICENSE)). You may use, modify, and redistribute it under those
+  terms.
+- **The names and logos are not.** "Penname" and "Philanthropel", the Penname
+  pen-nib mark, and the Philanthropel logo are **trademarks of Philanthropel
+  Limited, all rights reserved** (see [`NOTICE`](NOTICE)). The open-source
+  license covers the source code only — it does not grant any right to use these
+  names or logos, so please don't ship forks or other products under the Penname
+  or Philanthropel name.

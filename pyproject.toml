@@ -1,9 +1,10 @@
 [project]
 name = "penname"
-version = "0.1.0"
-description = "Gives sensitive values in donor documents a pen name before you share them with an LLM, then restores the real values afterwards. Runs entirely on your machine."
+version = "2.0.0"
+description = "A free, open-source tool for nonprofits by Philanthropel. Gives sensitive values in donor documents a pen name before you share them with an AI assistant, then restores the real values afterwards. Runs entirely on your machine."
 readme = "README.md"
 license = "Apache-2.0"
+authors = [{ name = "Philanthropel Limited" }]
 requires-python = ">=3.11"
 dependencies = [
     "presidio-analyzer>=2.2.355",

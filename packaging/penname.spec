@@ -60,8 +60,9 @@ if os.path.isdir(_model_dir):
 # lazily (inside functions), which PyInstaller's static analysis would miss.
 hiddenimports += collect_submodules("penname")
 
-# Our own data files that live beside the code (CRM column templates).
-datas += collect_data_files("penname", includes=["**/*.json"])
+# Our own data files that live beside the code: CRM column templates (JSON)
+# and image assets (logos, icon) shown in the app.
+datas += collect_data_files("penname", includes=["**/*.json", "**/*.png"])
 
 block_cipher = None
 
