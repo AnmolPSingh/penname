@@ -5,14 +5,14 @@
 <title>How Penname works</title>
 <meta name="hz:slide-selector" content=".infographic" />
 <meta name="hz:canvas-width" content="1600" />
-<meta name="hz:canvas-height" content="940" />
+<meta name="hz:canvas-height" content="960" />
 <link rel="stylesheet" href="https://use.typekit.net/pym1ihk.css">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#e8e6e2; display:flex; justify-content:center; align-items:center; min-height:100vh; }
 
 .infographic {
-  position:relative; width:1600px; height:940px; overflow:hidden;
+  position:relative; width:1600px; height:960px; overflow:hidden;
   background:#faf8f5; color:#27251e;
   font-family:"poppins", sans-serif; font-weight:400;
 }
@@ -33,7 +33,7 @@ body { background:#e8e6e2; display:flex; justify-content:center; align-items:cen
 .head p { margin-top:20px; font-size:21px; line-height:1.5; color:#72706b; width:1190px; }
 
 /* ---- the round trip ---- */
-.stage { position:absolute; top:448px; width:316px; }
+.stage { position:absolute; top:470px; width:316px; }
 .chip { display:inline-block; padding:13px 20px; border-radius:999px;
         font-size:22px; font-weight:500; letter-spacing:-0.2px; white-space:nowrap; }
 .chip.real { background:#fdfbfa; border:1px solid #d1d1cd; color:#27251e; }
@@ -41,15 +41,15 @@ body { background:#e8e6e2; display:flex; justify-content:center; align-items:cen
 .cap { margin-top:12px; font-size:16px; line-height:1.4; color:#72706b; }
 
 /* ---- spine ---- */
-.spine { position:absolute; left:72px; right:72px; top:578px; height:1px; background:#d1d1cd; }
-.chev { position:absolute; top:566px; color:#d1d1cd; font-size:26px; line-height:1;
+.spine { position:absolute; left:72px; right:72px; top:596px; height:1px; background:#d1d1cd; }
+.chev { position:absolute; top:584px; color:#d1d1cd; font-size:26px; line-height:1;
           font-weight:400; }
-.marker { position:absolute; top:556px; width:44px; height:44px; border-radius:999px;
+.marker { position:absolute; top:574px; width:44px; height:44px; border-radius:999px;
           background:#faf8f5; border:1px solid #016a71; color:#016a71;
           font-size:20px; font-weight:500; display:flex; align-items:center; justify-content:center; }
 
 /* ---- steps: titles occupy a reserved block so every body starts level ---- */
-.step { position:absolute; top:634px; width:316px; }
+.step { position:absolute; top:652px; width:316px; }
 .step h2 { font-size:27px; font-weight:500; letter-spacing:-0.4px; line-height:1.18;
            min-height:44px; }
 .step p { font-size:18.5px; line-height:1.5; color:#72706b; }
@@ -64,7 +64,7 @@ body { background:#e8e6e2; display:flex; justify-content:center; align-items:cen
 </style>
 </head>
 <body>
-<div class="infographic" data-canvas-width="1600" data-canvas-height="940">
+<div class="infographic" data-canvas-width="1600" data-canvas-height="960">
 
   <div class="brand"><svg class="nib" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" aria-label="Penname">
   <path fill="#27251E" fill-rule="evenodd" d="M64 18 C 78 18 89 27 92 43 L 72 84 C 69.5 88.5 66.5 92.5 64 96 C 61.5 92.5 58.5 88.5 56 84 L 36 43 C 39 27 50 18 64 18 Z M57.5 44 a6.5 6.5 0 1 0 13 0 a6.5 6.5 0 1 0 -13 0 Z M62.4 52 L65.6 52 L65.6 87 A1.6 1.6 0 0 1 62.4 87 Z"/>
@@ -77,9 +77,10 @@ body { background:#e8e6e2; display:flex; justify-content:center; align-items:cen
   <div class="rule"></div>
 
   <div class="head">
-    <h1>Give donor data a <em>pen name</em><br />before you share it with AI.</h1>
-    <p>Penname finds the sensitive values in your documents, swaps them for realistic stand-ins,
-       and puts the real ones back afterwards. Everything happens on your own computer.</p>
+    <h1>Hide <em>every donor detail</em><br />before you share a document with AI.</h1>
+    <p>Names, contact details, gift amounts, wealth ratings, fund codes and constituent IDs are
+       swapped for realistic stand-ins. You put the real ones back afterwards. Everything happens
+       on your own computer, with no internet.</p>
   </div>
 
   <div class="stage" style="left:72px"><div class="chip real">Margaret Wilson</div><div class="cap">the real value in your document</div></div><div class="stage" style="left:430px"><div class="chip pen">Dorothy Fields</div><div class="cap">the pen name, approved by you</div></div><div class="stage" style="left:788px"><div class="chip pen">Dorothy Fields</div><div class="cap">all the AI assistant ever sees</div></div><div class="stage" style="left:1146px"><div class="chip real">Margaret Wilson</div><div class="cap">restored, on your computer only</div></div>
