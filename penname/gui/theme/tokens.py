@@ -18,6 +18,16 @@ INK = "#27251e"  # primary text, filled buttons
 DEEP_TEAL = "#016a71"  # the single accent: active nav, selected, badges
 WHITE = "#ffffff"  # text on teal/ink fills only — never a surface
 
+# The one departure from DESIGN.md's single-accent rule, made deliberately.
+# Penname sometimes has to say "this could not be done safely", and that is the
+# most important sentence it will ever show. In grey it was indistinguishable
+# from help text. This oxblood is warm enough to sit on parchment and is
+# reserved *solely* for failure: never for emphasis, decoration, or warnings
+# the user cannot act on. Success stays teal; ordinary help stays graphite.
+ALERT = "#8a2b1c"  # failure text
+ALERT_SURFACE = "#fdf4f1"  # failure notice background, one step off parchment
+ALERT_BORDER = "#e3c8c0"  # failure notice hairline
+
 # Sidebar sits a touch off the canvas, per DESIGN.md's "slightly darker
 # parchment tone with subtle separation".
 SIDEBAR_BG = "#f6f3ef"

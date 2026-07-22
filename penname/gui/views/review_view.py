@@ -2,26 +2,27 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, QSortFilterProxyModel, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QHeaderView,
     QInputDialog,
     QLabel,
+    QLineEdit,
     QPushButton,
     QTableView,
     QVBoxLayout,
     QWidget,
 )
 
-from penname.gui.models import COL_ORIGINAL, COL_TYPE, ReviewModel
+from penname.gui.models import COL_ORIGINAL, COL_REPLACE, COL_TYPE, ReviewModel
 from penname.gui.theme import tokens as t
 from penname.gui.widgets import PillDelegate
 
 BANNER_TEXT = (
     "Penname reduces what you share. It does not make data anonymous. "
     "Always review before sending.\n"
-    "Check every row below — untick anything that should keep its real value, "
+    "Check every row below. Untick anything that should keep its real value, "
     "and click a pen name to change it."
 )
 
@@ -47,8 +48,18 @@ class ReviewView(QWidget):
         layout.addSpacing(t.SPACE_8)
 
         self.model = ReviewModel(self)
+        # A filter over every column, so typing "Gift" narrows to gift amounts
+        # and typing a donor's name finds every row mentioning them. Long CRM
+        # exports are unreviewable without it.
+        self.proxy = QSortFilterProxyModel(self)
+        self.proxy.setSourceModel(self.model)
+        self.proxy.setFilterKeyColumn(-1)
+        self.proxy.setFilterCaseSensitivity(Qt.CaseInsensitive)
+
+        layout.addWidget(self._build_filter_row())
+
         self.table = QTableView()
-        self.table.setModel(self.model)
+        self.table.setModel(self.proxy)
         self.table.setAlternatingRowColors(False)  # flat sheet, not a zebra grid
         self.table.setShowGrid(False)
         self.table.setSelectionBehavior(QTableView.SelectRows)
@@ -56,6 +67,7 @@ class ReviewView(QWidget):
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Stretch)
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(COL_TYPE, QHeaderView.ResizeToContents)  # pills
         header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # "How sure?"
         header.setHighlightSections(False)
         self.table.verticalHeader().setVisible(False)
@@ -64,6 +76,7 @@ class ReviewView(QWidget):
 
         self.count_label = QLabel("")
         self.count_label.setProperty("role", "helper")
+        self.count_label.setWordWrap(True)
         layout.addWidget(self.count_label)
 
         buttons = QHBoxLayout()
@@ -74,22 +87,64 @@ class ReviewView(QWidget):
         buttons.addWidget(add_button)
         buttons.addStretch(1)
 
-        self.continue_button = QPushButton("Looks good — continue to export")
+        self.continue_button = QPushButton("Looks good, continue to export")
         self.continue_button.setProperty("role", "primary")
         self.continue_button.clicked.connect(self.continue_clicked)
         buttons.addWidget(self.continue_button)
         layout.addLayout(buttons)
 
+    def _build_filter_row(self) -> QWidget:
+        row = QHBoxLayout()
+        row.setSpacing(t.SPACE_12)
+
+        self.filter_box = QLineEdit()
+        self.filter_box.setPlaceholderText("Search these values, or a type like Gift amount")
+        self.filter_box.setClearButtonEnabled(True)
+        self.filter_box.textChanged.connect(self._on_filter_changed)
+        row.addWidget(self.filter_box, 1)
+
+        self.tick_all_button = QPushButton("Tick all shown")
+        self.tick_all_button.clicked.connect(lambda: self._set_all_shown(True))
+        row.addWidget(self.tick_all_button)
+
+        self.untick_all_button = QPushButton("Untick all shown")
+        self.untick_all_button.clicked.connect(lambda: self._set_all_shown(False))
+        row.addWidget(self.untick_all_button)
+
+        wrap = QWidget()
+        wrap.setLayout(row)
+        return wrap
+
+    def _on_filter_changed(self, text: str) -> None:
+        self.proxy.setFilterFixedString(text)
+        self._update_count()
+
+    def _set_all_shown(self, replace: bool) -> None:
+        """Bulk-apply to the rows currently visible, which is what the filter is
+        for: narrow to one type, then decide about all of it at once."""
+        state = Qt.Checked if replace else Qt.Unchecked
+        for proxy_row in range(self.proxy.rowCount()):
+            source = self.proxy.mapToSource(self.proxy.index(proxy_row, COL_REPLACE))
+            self.model.setData(source, state, Qt.CheckStateRole)
+
     def load_mapping(self, mapping) -> None:
         self.model.load_mapping(mapping)
-        n = self.model.rowCount()
-        self.count_label.setText(
-            f"Found {n} value{'s' if n != 1 else ''} that may be sensitive. "
-            "No tool catches everything — please read your document once more "
-            "before sharing it."
+        self._update_count()
+        if self.proxy.rowCount() > 0:
+            self.table.setCurrentIndex(self.proxy.index(0, COL_ORIGINAL))
+
+    def _update_count(self) -> None:
+        total = self.model.rowCount()
+        shown = self.proxy.rowCount()
+        found = (
+            f"Found {total} value{'s' if total != 1 else ''} that may be sensitive. "
         )
-        if self.model.rowCount() > 0:
-            self.table.setCurrentIndex(self.model.index(0, COL_ORIGINAL))
+        if shown != total:
+            found += f"Showing {shown} of them. "
+        self.count_label.setText(
+            found + "No tool catches everything, so please read your document "
+            "once more before sharing it."
+        )
 
     def _add_value(self) -> None:
         text, ok = QInputDialog.getText(

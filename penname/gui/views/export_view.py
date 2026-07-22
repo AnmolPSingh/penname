@@ -20,8 +20,8 @@ from penname.gui.theme import tokens as t
 from penname.gui.widgets import Card
 
 REVIEW_REMINDER = (
-    "Review before sending. Penname reduces what you share — "
-    "it does not make data anonymous."
+    "Review before sending. Penname reduces what you share. "
+    "It does not make data anonymous."
 )
 
 
@@ -59,7 +59,7 @@ class ExportView(QWidget):
         grid.addWidget(
             Card(
                 "The key file (.pnmap)",
-                "Encrypted, and kept on this computer. Keep it safe — you need it "
+                "Encrypted, and kept on this computer. Keep it safe, because you need it "
                 "for the last step, to put the real values back.",
             ),
             0,
@@ -118,6 +118,12 @@ class ExportView(QWidget):
         if path:
             self.export_requested.emit(path, self.markdown_check.isChecked())
 
+    def _show_status(self, text: str, role: str) -> None:
+        self.status.setProperty("role", role)
+        self.status.setText(text)
+        self.status.style().unpolish(self.status)
+        self.status.style().polish(self.status)
+
     def show_success(self, dest: str, mapping_path: str, markdown_path: str | None) -> None:
         lines = [
             f"Saved the pen-named copy to:  {dest}",
@@ -130,10 +136,10 @@ class ExportView(QWidget):
             "Next: paste the pen-named copy into your AI assistant. When you have "
             "its reply, come back and use “Take the pen names off”."
         )
-        self.status.setText("\n".join(lines))
+        self._show_status("\n".join(lines), "success")
 
     def show_error(self, message: str) -> None:
-        self.status.setText(f"Something went wrong: {message}")
+        self._show_status(f"Nothing was saved. {message}", "error")
 
 
 def default_directory(source: Path | None) -> str:

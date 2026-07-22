@@ -1,6 +1,6 @@
 """Review-table model: one row per detected value, nothing destructive.
 
-Unchecking "Give a pen name?" keeps the real value — and can be re-checked,
+Unchecking "Change?" keeps the real value — and can be re-checked,
 which is this screen's undo. The pen-name column is directly editable.
 """
 
@@ -13,7 +13,7 @@ from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 from penname.core.types import Mapping
 from penname.core.labels import certainty_label, entity_label
 
-COLUMNS = ("Give a pen name?", "Real value", "What it is", "How sure?", "Pen name")
+COLUMNS = ("Change?", "Real value", "What it is", "How sure?", "Pen name")
 COL_REPLACE, COL_ORIGINAL, COL_TYPE, COL_CERTAINTY, COL_PEN = range(5)
 
 
@@ -82,6 +82,10 @@ class ReviewModel(QAbstractTableModel):
                 return certainty_label(row.score)
             if col == COL_PEN:
                 return row.pen_name if row.replace_it else "(keeping the real value)"
+        if role == Qt.ToolTipRole and col in (COL_ORIGINAL, COL_PEN):
+            # Long values are elided in the cell, but the reviewer has to be
+            # able to read the whole thing before deciding.
+            return row.original if col == COL_ORIGINAL else row.pen_name
         return None
 
     def flags(self, index: QModelIndex):

@@ -101,12 +101,15 @@ class ReverseView(QWidget):
     def _restore(self) -> None:
         text = self.response_edit.toPlainText()
         if not text.strip():
-            self.status.setText("Paste the assistant's reply first, then try again.")
+            self._show_status(
+                "Paste the assistant's reply first, then try again.", "error"
+            )
             return
         if not self._mapping_path:
-            self.status.setText(
-                "Choose the mapping file first — it was saved next to your "
-                "pen-named copy and ends in .pnmap."
+            self._show_status(
+                "Choose the key file first. It was saved next to your pen-named "
+                "copy and ends in .pnmap.",
+                "error",
             )
             return
         dest, _ = QFileDialog.getSaveFileName(
@@ -115,11 +118,18 @@ class ReverseView(QWidget):
         if dest:
             self.restore_requested.emit(text, self._mapping_path, dest)
 
+    def _show_status(self, text: str, role: str) -> None:
+        self.status.setProperty("role", role)
+        self.status.setText(text)
+        self.status.style().unpolish(self.status)
+        self.status.style().polish(self.status)
+
     def show_success(self, count: int, dest: str) -> None:
-        self.status.setText(
-            f"Done — took {count} pen name{'s' if count != 1 else ''} off and "
-            f"saved the restored text to:\n{dest}"
+        self._show_status(
+            f"Done. Took {count} pen name{'s' if count != 1 else ''} off and "
+            f"saved the restored text to:\n{dest}",
+            "success",
         )
 
     def show_error(self, message: str) -> None:
-        self.status.setText(f"Something went wrong: {message}")
+        self._show_status(f"Nothing was restored. {message}", "error")

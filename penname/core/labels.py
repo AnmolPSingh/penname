@@ -30,4 +30,4 @@ def certainty_label(score: float) -> str:
         return "Very sure"
     if score >= 0.6:
         return "Fairly sure"
-    return "Less sure — check this"
+    return "Less sure, check this"

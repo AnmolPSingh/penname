@@ -24,6 +24,7 @@ QWidget {{
 
 /* ---- typography roles ---- */
 QLabel {{ background: transparent; }}
+QWidget[role="plain"] {{ background: transparent; }}
 QLabel[role="heading"] {{
     font-size: {t.TEXT_HEADING}px;
     font-weight: {t.WEIGHT_MEDIUM};
@@ -71,6 +72,48 @@ QLabel[role="notice"] {{
     font-size: {t.TEXT_LABEL}px;
 }}
 
+/* failure notice: the one place the alert colour is allowed */
+QLabel[role="error"] {{
+    background-color: {t.ALERT_SURFACE};
+    border: 1px solid {t.ALERT_BORDER};
+    border-radius: {t.RADIUS_CARD}px;
+    padding: {t.SPACE_16}px;
+    color: {t.ALERT};
+    font-size: {t.TEXT_LABEL}px;
+}}
+
+/* success reads in the accent, so it can never be mistaken for failure */
+QLabel[role="success"] {{
+    color: {t.DEEP_TEAL};
+    font-size: {t.TEXT_LABEL}px;
+    font-weight: {t.WEIGHT_MEDIUM};
+}}
+
+/* ---- drop zone: the Open screen's target ---- */
+QFrame[role="drop"] {{
+    background-color: {t.SOFT_PAPER};
+    border: 1px solid {t.WARM_MIST};
+    border-radius: {t.RADIUS_CARD}px;
+}}
+QFrame[role="drop"][dragging="true"] {{
+    border: 1px solid {t.DEEP_TEAL};
+    background-color: {t.PARCHMENT};
+}}
+QFrame[role="drop"] QLabel {{ background: transparent; }}
+
+/* ---- progress: the scan is the app's slowest moment ---- */
+QProgressBar {{
+    background-color: {t.SOFT_PAPER};
+    border: 1px solid {t.WARM_MIST};
+    border-radius: {t.SPACE_4}px;
+    max-height: {t.SPACE_8}px;
+    text-align: center;
+}}
+QProgressBar::chunk {{
+    background-color: {t.DEEP_TEAL};
+    border-radius: {t.SPACE_4}px;
+}}
+
 /* ---- ghost button: low emphasis ---- */
 QPushButton {{
     background: transparent;
@@ -111,6 +154,7 @@ QFrame[role="sidebar"] {{
 QFrame[role="sidebar"] QWidget {{ background: transparent; }}
 QPushButton[role="nav"] {{
     background: transparent;
+    outline: none;
     color: {t.GRAPHITE};
     border: none;
     border-radius: {t.RADIUS_NAV}px;
@@ -168,6 +212,22 @@ QHeaderView::section {{
     font-weight: {t.WEIGHT_MEDIUM};
 }}
 QTableCornerButton::section {{ background: {t.SOFT_PAPER}; border: none; }}
+
+/* The tick is the most-used control in the app and the style's native one is
+   tiny. Size it for older eyes, matching the standalone checkbox. */
+QTableView::indicator {{
+    width: {t.SPACE_24}px;
+    height: {t.SPACE_24}px;
+    margin-left: {t.SPACE_12}px;
+    border: 1px solid {t.WARM_MIST};
+    border-radius: {t.SPACE_4}px;
+    background: {t.SOFT_PAPER};
+}}
+QTableView::indicator:checked {{
+    border-color: {t.DEEP_TEAL};
+    image: url("{check_on}");
+}}
+QTableView::indicator:hover {{ border-color: {t.DEEP_TEAL}; }}
 
 QScrollBar:vertical {{ background: transparent; width: {t.SPACE_12}px; margin: 0; }}
 QScrollBar::handle:vertical {{

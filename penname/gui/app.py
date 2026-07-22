@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Penname")
         self.setWindowIcon(QIcon(asset_path("penname-icon.png")))
         self.resize(1100, 720)
+        self.setAcceptDrops(True)
 
         self.flow = DocumentFlow(self)
 
@@ -183,6 +184,26 @@ class MainWindow(QMainWindow):
 
     def _set_step_enabled(self, page: int, enabled: bool) -> None:
         self.nav_buttons[page].setEnabled(enabled)
+
+    # -- drag and drop -----------------------------------------------------
+    # The content column is capped at 900px, so a dropped file can easily land
+    # on the margin beside it. The window catches those and hands them on.
+    def _droppable(self, event) -> str | None:
+        if self.pages.currentIndex() != PAGE_OPEN:
+            return None
+        if not self.open_view.open_button.isEnabled():
+            return None
+        return OpenView.dropped_path(event)
+
+    def dragEnterEvent(self, event) -> None:  # noqa: N802 (Qt naming)
+        if self._droppable(event):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event) -> None:  # noqa: N802
+        path = self._droppable(event)
+        if path:
+            event.acceptProposedAction()
+            self.open_view.accept_path(path)
 
     # -- handlers ----------------------------------------------------------
     def _on_scan_finished(self, mapping) -> None:

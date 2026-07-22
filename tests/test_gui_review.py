@@ -24,7 +24,7 @@ def test_review_model_loads_and_labels(qtbot) -> None:
     assert model.data(model.index(0, 1)) == "Margaret Wilson"
     assert model.data(model.index(0, 2)) == "Name"
     assert model.data(model.index(0, 3)) == "Very sure"
-    assert model.data(model.index(2, 3)) == "Less sure — check this"
+    assert model.data(model.index(2, 3)) == "Less sure, check this"
     assert model.data(model.index(0, COL_PEN)) == "Dorothy Fields"
 
 
@@ -86,3 +86,79 @@ def test_main_window_smoke(qtbot) -> None:
 
     assert "does not make data anonymous" in BANNER_TEXT
     assert "review before sending" in BANNER_TEXT.lower()
+
+
+def test_filter_narrows_rows_and_bulk_untick_applies_to_shown_only(qtbot) -> None:
+    """A 500-row CRM export is unreviewable without filter + bulk actions."""
+    from penname.gui.views.review_view import ReviewView
+
+    view = ReviewView()
+    qtbot.addWidget(view)
+    view.load_mapping(MAPPING)
+    assert view.proxy.rowCount() == 3
+
+    view.filter_box.setText("margaret")
+    assert view.proxy.rowCount() == 1
+
+    view._set_all_shown(False)
+    rows = view.model.rows()
+    assert rows[0].replace_it is False  # the shown row
+    assert rows[1].replace_it is True  # hidden rows untouched
+    assert rows[2].replace_it is True
+
+    view.filter_box.setText("")
+    assert view.proxy.rowCount() == 3
+
+
+def test_failure_states_use_the_alert_role_not_grey_body_text(qtbot) -> None:
+    """Errors must be distinguishable from help text (critique P2)."""
+    from penname.gui.views.export_view import ExportView
+    from penname.gui.views.open_view import OpenView
+    from penname.gui.views.reverse_view import ReverseView
+
+    for view, args in (
+        (OpenView(), ("disk is full",)),
+        (ExportView(), ("disk is full",)),
+        (ReverseView(), ("that key file does not match",)),
+    ):
+        qtbot.addWidget(view)
+        view.show_error(*args)
+        assert view.status.property("role") == "error"
+
+    export = ExportView()
+    qtbot.addWidget(export)
+    export.show_success("out.docx", "out.pnmap", None)
+    assert export.status.property("role") == "success"
+
+
+def test_scanning_shows_progress_and_clears_on_finish(qtbot) -> None:
+    from penname.gui.views.open_view import OpenView
+
+    view = OpenView()
+    qtbot.addWidget(view)
+    assert not view.progress.isVisibleTo(view)
+
+    view.show_scanning("appeal.docx")
+    assert view.progress.isVisibleTo(view)
+    assert not view.open_button.isEnabled()
+    assert "appeal.docx" in view.status.text()
+
+    view.show_idle()
+    assert not view.progress.isVisibleTo(view)
+    assert view.open_button.isEnabled()
+
+
+def test_unsupported_file_reports_without_emitting(qtbot) -> None:
+    from penname.gui.views.open_view import OpenView
+
+    view = OpenView()
+    qtbot.addWidget(view)
+    emitted = []
+    view.file_chosen.connect(emitted.append)
+
+    view.accept_path("/tmp/photo.heic")
+    assert emitted == []
+    assert view.status.property("role") == "error"
+
+    view.accept_path("/tmp/appeal.docx")
+    assert emitted == ["/tmp/appeal.docx"]
