@@ -30,6 +30,24 @@ def test_notice_reserves_trademarks() -> None:
     assert "Apache" in notice
 
 
+def test_disclaimer_covers_warranty_liability_and_responsibility() -> None:
+    d = penname.DISCLAIMER.lower()
+    assert "as is" in d
+    assert "not liable" in d
+    assert "responsible" in d
+    assert "not make your data anonymous" in d
+    assert "not" in d and "legal" in d  # "not legal or compliance advice"
+
+
+def test_notice_and_readme_carry_the_disclaimer() -> None:
+    notice = (ROOT / "NOTICE").read_text().lower()
+    readme = (ROOT / "README.md").read_text().lower()
+    for text in (notice, readme):
+        assert "as is" in text
+        assert "liable" in text
+        assert "responsible" in text
+
+
 def test_readme_keeps_open_source_and_credits_philanthropel() -> None:
     readme = (ROOT / "README.md").read_text()
     assert "open-source" in readme or "open source" in readme

@@ -281,3 +281,20 @@ nonprofit and philanthropy community.
   license covers the source code only — it does not grant any right to use these
   names or logos, so please don't ship forks or other products under the Penname
   or Philanthropel name.
+
+### Disclaimer & responsible use
+
+- **Penname helps, but it does not guarantee.** It reduces the personal data you
+  share; it does **not** remove all of it and does **not** make your data
+  anonymous. Always review the results before sharing them.
+- **Provided "as is".** Penname comes with **no warranty of any kind**, and
+  **Philanthropel Limited is not liable** for how you use it or for any outcome
+  of its use (this restates the Apache-2.0 license, sections 7–8).
+- **You are responsible.** You are responsible for reviewing Penname's output and
+  for meeting your own privacy and data-protection obligations under the laws
+  that apply to you.
+- **Not advice.** Penname is a tool, not legal or compliance advice.
+- **Lawful use only.** Do not use Penname for any unlawful purpose.
+
+Penname runs entirely on your computer and makes no network connections, so no
+information you process with it is ever sent to Philanthropel or anyone else.

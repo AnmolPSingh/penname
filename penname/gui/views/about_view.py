@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-from penname import COPYRIGHT, LICENSE_LINE, TAGLINE, __version__
+from penname import COPYRIGHT, DISCLAIMER, LICENSE_LINE, TAGLINE, __version__
 from penname.gui.assets import asset_path
 from penname.gui.theme import tokens as t
 
@@ -59,6 +59,12 @@ class AboutView(QWidget):
         license_label.setProperty("role", "helper")
         license_label.setWordWrap(True)
         layout.addWidget(license_label)
+
+        disclaimer = QLabel(DISCLAIMER)
+        disclaimer.setProperty("role", "banner")
+        disclaimer.setWordWrap(True)
+        layout.addSpacing(t.SPACE_8)
+        layout.addWidget(disclaimer)
 
         offline = QLabel("Everything stays on this computer. No internet is ever used.")
         offline.setProperty("role", "helper")
