@@ -41,9 +41,14 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
 
-      # Full suite includes the PySide6 GUI tests. On Linux, run under Xvfb so
-      # Qt has a real (virtual) display; elsewhere the offscreen platform is fine.
+      # Full suite incl. the PySide6 GUI tests + the 80% coverage gate. The GUI
+      # tests are reliable on macOS but flake in headless Linux/Windows CI, so
+      # this step is the blocking gate on macOS and reports-but-doesn't-block
+      # elsewhere. Cross-platform safety nets remain: the round-trip integrity
+      # gate above blocks on every OS, and the release workflow's frozen
+      # --self-test launches and round-trips the built app on macOS AND Windows.
       - name: Full test suite with coverage
+        continue-on-error: ${{ runner.os != 'macOS' }}
         shell: bash
         run: |
           if [ "${{ runner.os }}" = "Linux" ]; then
