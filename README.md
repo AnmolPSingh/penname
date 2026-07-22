@@ -8,19 +8,31 @@ happens on your own computer.**
 
 ### Why it matters
 
-AI assistants — ChatGPT, Claude, Copilot, and the command-line AI agents many
-teams now use — are genuinely useful for drafting letters, tidying spreadsheets,
-and summarising notes. But **anything you paste into one leaves your computer**
-and goes to the company that runs the AI, where it can be stored and, depending
-on the service, used to train their models. Once your donors' real names, gifts,
-and contact details are in someone else's system, you can't take them back.
+Your donors trust you with more than their gifts. They trust you with their
+names, their generosity, their addresses — sometimes their life stories. That
+trust is the quiet foundation your whole mission stands on, and it isn't yours
+to gamble.
 
-Using AI responsibly — the same due diligence you'd apply to any tool that
-handles people's data — means **sharing only what you need to**. Penname is the
-simple step in between: it swaps the sensitive details for realistic stand-ins so
-you can get the AI's help **without** handing over the real people behind the
-data, then restores the real values afterwards. It's a small habit that keeps you
-on the right side of your donors' trust — and your data-protection obligations.
+AI assistants — ChatGPT, Claude, Copilot, and the new command-line AI agents —
+can hand a stretched nonprofit team real hours back: a warm thank-you letter in
+seconds, a tangled spreadsheet tidied, a pile of notes finally made sense of. For
+people who never have enough time, that's a genuine gift.
+
+But here's what the demos don't tell you: **the moment you paste real donor data
+into one of these tools, it leaves your computer.** It travels to the company
+running the AI, where it can be stored — and, depending on the service, used to
+train future models. You can't un-send it. One helpful shortcut can quietly
+become a data-protection problem, or a crack in the trust you spent years
+earning.
+
+You shouldn't have to choose between using great tools and protecting your
+people. **That's exactly what Penname is for.** It gives every sensitive detail a
+convincing "pen name" *before* anything reaches the AI — so you get all of the
+help and share none of the real people. When the reply comes back, Penname puts
+the real details back, right on your own machine. Nothing ever leaves.
+
+*Use the tools everyone's talking about. Keep the trust you've spent years
+building. You can have both.*
 
 <p align="center">
   <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname.dmg"><img src="brand/button-mac.png" alt="Download for Mac" height="52"></a>
