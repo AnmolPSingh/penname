@@ -6,6 +6,22 @@
 with an AI assistant — then swap the real details back afterwards. Everything
 happens on your own computer.**
 
+### Why it matters
+
+AI assistants — ChatGPT, Claude, Copilot, and the command-line AI agents many
+teams now use — are genuinely useful for drafting letters, tidying spreadsheets,
+and summarising notes. But **anything you paste into one leaves your computer**
+and goes to the company that runs the AI, where it can be stored and, depending
+on the service, used to train their models. Once your donors' real names, gifts,
+and contact details are in someone else's system, you can't take them back.
+
+Using AI responsibly — the same due diligence you'd apply to any tool that
+handles people's data — means **sharing only what you need to**. Penname is the
+simple step in between: it swaps the sensitive details for realistic stand-ins so
+you can get the AI's help **without** handing over the real people behind the
+data, then restores the real values afterwards. It's a small habit that keeps you
+on the right side of your donors' trust — and your data-protection obligations.
+
 <p align="center">
   <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname.dmg"><img src="brand/button-mac.png" alt="Download for Mac" height="52"></a>
   &nbsp;&nbsp;
