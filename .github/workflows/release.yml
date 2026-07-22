@@ -87,7 +87,7 @@ jobs:
 
       - name: Attest build provenance (macOS)
         if: runner.os == 'macOS'
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             dist/Penname-macos.zip
@@ -95,7 +95,7 @@ jobs:
 
       - name: Attest build provenance (Windows)
         if: runner.os == 'Windows'
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             dist/Penname-windows.zip
