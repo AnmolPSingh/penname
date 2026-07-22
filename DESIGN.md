@@ -137,8 +137,28 @@ Graphite (#72706b) text, weight 400 at 12px, uppercase or sentence case, no back
 - Apply 1px Warm Mist (#d1d1cd) borders for hairline card/button outlines; avoid heavier 2px+ borders.
 - Use the pplxSans type scale: 16px/1.5 for body, 14px/1.43 for UI labels, 12px/1.33 for micro labels, 11px/1.5 for badges.
 
+### The one sanctioned exception: failure
+
+Penname is not a content app. It sometimes has to say *"this could not be done
+safely"* — that a document could not be restored byte-for-byte, that a key file
+does not match, that nothing was saved. That is the most important sentence the
+product will ever show, and in Graphite it was indistinguishable from help text.
+
+One oxblood is therefore permitted, warm enough to sit on Parchment:
+
+| Role | Hex | Token | Usage |
+|---|---|---|---|
+| Alert | `#8a2b1c` | `ALERT` | Failure text only |
+| Alert Surface | `#fdf4f1` | `ALERT_SURFACE` | Failure notice background |
+| Alert Border | `#e3c8c0` | `ALERT_BORDER` | Failure notice hairline |
+
+Reserved **solely** for failure. Never for emphasis, decoration, destructive-action
+styling, or warnings the reader cannot act on. Success reads in Deep Teal, so the
+two states can never be confused. If a message does not mean "something went
+wrong and here is what to do", it stays Graphite.
+
 ### Don't
-- Don't introduce new accent colors — the system is deliberately monochrome with one teal; any second chromatic color breaks the brand's restraint.
+- Don't introduce new accent colors beyond the sanctioned alert above — the system is deliberately monochrome with one teal; any further chromatic color breaks the brand's restraint.
 - Don't use bold (600+) weights — pplxSans caps at 500 and the design depends on that calmness.
 - Don't add drop shadows beyond the single 1px subtle shadow on cards — the interface is intentionally flat.
 - Don't use pure white (#ffffff) as a surface color — always offset with Parchment (#faf8f5) or Soft Paper (#fdfbfa) to maintain the warm paper feel.
