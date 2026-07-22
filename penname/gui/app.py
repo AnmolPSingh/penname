@@ -172,8 +172,14 @@ class MainWindow(QMainWindow):
 
     def _go_to(self, page: int) -> None:
         self.pages.setCurrentIndex(page)
-        if page < len(self.nav_buttons):  # About has no numbered nav button
+        if page < len(self.nav_buttons):
             self.nav_buttons[page].setChecked(True)
+            return
+        # About has no nav entry, so nothing in the rail should read as active.
+        self.nav_group.setExclusive(False)
+        for button in self.nav_buttons:
+            button.setChecked(False)
+        self.nav_group.setExclusive(True)
 
     def _set_step_enabled(self, page: int, enabled: bool) -> None:
         self.nav_buttons[page].setEnabled(enabled)

@@ -42,17 +42,19 @@ class AboutView(QWidget):
         tagline.setWordWrap(True)
         layout.addWidget(tagline)
 
-        layout.addSpacing(t.SPACE_16)
+        layout.addSpacing(t.SPACE_32)
         by = QLabel("Made by")
-        by.setProperty("role", "helper")
+        by.setProperty("role", "section")
         layout.addWidget(by)
+        layout.addSpacing(t.SPACE_8)
 
         philan = QLabel()
-        philan.setPixmap(_pixmap("philanthropel-logo.png", 34))
+        philan.setPixmap(_pixmap("philanthropel-logo.png", 30))
         layout.addWidget(philan)
 
-        layout.addSpacing(t.SPACE_16)
+        layout.addSpacing(t.SPACE_8)
         copyright_label = QLabel(COPYRIGHT)
+        copyright_label.setProperty("role", "subhead")
         layout.addWidget(copyright_label)
 
         license_label = QLabel(LICENSE_LINE)

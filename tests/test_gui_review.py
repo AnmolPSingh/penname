@@ -56,11 +56,16 @@ def test_pen_name_edits_are_validated(qtbot) -> None:
 
 
 def test_stylesheet_uses_design_tokens_and_correct_language() -> None:
+    import re
+
     qss = build_stylesheet()
     assert tokens.PARCHMENT in qss
     assert tokens.DEEP_TEAL in qss
     assert tokens.INK in qss
-    assert "anonymiz" not in qss.lower()
+    # Check our own wording, not embedded asset paths: the checkout directory
+    # may itself contain the banned word (e.g. ".../Document Anonymizer/").
+    authored = re.sub(r'url\("[^"]*"\)', "url()", qss)
+    assert "anonymiz" not in authored.lower()
     # DESIGN.md: weights capped at 500 — no bold anywhere in the theme.
     assert "font-weight: 600" not in qss and "bold" not in qss
 

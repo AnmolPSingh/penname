@@ -6,10 +6,13 @@ strictly flat (Qt has no box-shadow, so the spec's single 1px shadow is
 expressed as the hairline border it already pairs with).
 """
 
+from penname.gui.assets import asset_path
 from penname.gui.theme import tokens as t
 
 
 def build_stylesheet() -> str:
+    # QSS needs forward slashes even on Windows.
+    check_on = asset_path("check-on.png").replace("\\", "/")
     return f"""
 QWidget {{
     background-color: {t.PARCHMENT};
@@ -185,7 +188,9 @@ QCheckBox::indicator {{
     background: {t.SOFT_PAPER};
 }}
 QCheckBox::indicator:checked {{
-    background-color: {t.DEEP_TEAL};
+    /* teal box with a clear tick — a filled square alone doesn't read as "on" */
     border-color: {t.DEEP_TEAL};
+    image: url("{check_on}");
 }}
+QCheckBox::indicator:hover {{ border-color: {t.DEEP_TEAL}; }}
 """

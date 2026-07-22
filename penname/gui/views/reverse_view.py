@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
@@ -23,40 +23,65 @@ class ReverseView(QWidget):
         super().__init__(parent)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(t.SPACE_32, t.SPACE_32, t.SPACE_32, t.SPACE_32)
-        layout.setSpacing(t.SPACE_16)
+        layout.setSpacing(t.SPACE_8)
 
         heading = QLabel("Take the pen names off")
         heading.setProperty("role", "heading")
         layout.addWidget(heading)
 
         intro = QLabel(
-            "Paste your AI assistant's reply below. Penname will put the real "
-            "values back and save the result as a file on this computer."
+            "Paste your assistant's reply. Penname puts the real values back and "
+            "saves the result on this computer."
         )
+        intro.setProperty("role", "subhead")
         intro.setWordWrap(True)
         layout.addWidget(intro)
 
+        layout.addSpacing(t.SPACE_16)
+        paste_label = QLabel("The assistant's reply")
+        paste_label.setProperty("role", "section")
+        layout.addWidget(paste_label)
+        layout.addSpacing(t.SPACE_4)
+
         self.response_edit = QPlainTextEdit()
-        self.response_edit.setPlaceholderText("Paste the assistant's reply here…")
+        self.response_edit.setPlaceholderText("Paste the reply here…")
         layout.addWidget(self.response_edit, 1)
+
+        layout.addSpacing(t.SPACE_16)
+        key_label = QLabel("The key file")
+        key_label.setProperty("role", "section")
+        layout.addWidget(key_label)
+        layout.addSpacing(t.SPACE_4)
 
         mapping_row = QHBoxLayout()
         mapping_row.setSpacing(t.SPACE_12)
-        self.mapping_button = QPushButton("Choose the mapping file (.pnmap)…")
+        self.mapping_button = QPushButton("Choose the key file (.pnmap)…")
+        self.mapping_button.setCursor(Qt.PointingHandCursor)
         self.mapping_button.clicked.connect(self._choose_mapping)
         mapping_row.addWidget(self.mapping_button)
-        self.mapping_label = QLabel("No mapping file chosen yet.")
+        self.mapping_label = QLabel("No key file chosen yet.")
         self.mapping_label.setProperty("role", "helper")
+        self.mapping_label.setWordWrap(True)
         mapping_row.addWidget(self.mapping_label, 1)
-        layout.addLayout(mapping_row)
+        mapping_wrap = QWidget()
+        mapping_wrap.setLayout(mapping_row)
+        layout.addWidget(mapping_wrap)
 
-        self.restore_button = QPushButton("Put the real values back and save…")
+        layout.addSpacing(t.SPACE_16)
+        action_row = QHBoxLayout()
+        action_row.setSpacing(t.SPACE_12)
+        self.restore_button = QPushButton("Put the real values back…")
         self.restore_button.setProperty("role", "primary")
-        self.restore_button.setMaximumWidth(420)
+        self.restore_button.setCursor(Qt.PointingHandCursor)
         self.restore_button.clicked.connect(self._restore)
-        layout.addWidget(self.restore_button)
+        action_row.addWidget(self.restore_button)
+        action_row.addStretch(1)
+        action_wrap = QWidget()
+        action_wrap.setLayout(action_row)
+        layout.addWidget(action_wrap)
 
         self.status = QLabel("")
+        self.status.setProperty("role", "subhead")
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
 

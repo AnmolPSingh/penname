@@ -2,6 +2,11 @@
   <img src="brand/penname-logo.png" alt="Penname" width="360">
 </p>
 
+<p align="center">
+  <sub>A free, open-source tool for nonprofits by</sub><br>
+  <img src="brand/philanthropel-logo.png" alt="Philanthropel" width="190">
+</p>
+
 **Give the private details in your donor files a "pen name" before you share them
 with an AI assistant — then swap the real details back afterwards. Everything
 happens on your own computer.**
@@ -39,7 +44,7 @@ building. You can have both.*
   &nbsp;&nbsp;
   <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-Setup.exe"><img src="brand/button-windows.png" alt="Download for Windows" height="52"></a>
 </p>
-<p align="center"><sub>A free, open-source tool for nonprofits, by <b>Philanthropel</b> · runs entirely on your computer · <a href="../../releases/latest">all downloads &amp; checksums</a></sub></p>
+<p align="center"><sub>Runs entirely on your computer · © 2026 Philanthropel Limited · <a href="../../releases/latest">all downloads &amp; checksums</a></sub></p>
 
 Penname is a free tool for fundraisers and nonprofit teams. If you'd like help
 from an AI assistant (like ChatGPT, Claude, or Copilot) to write a thank-you
