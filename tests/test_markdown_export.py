@@ -5,9 +5,16 @@ from pathlib import Path
 from penname.core.io.markdown import export_markdown, to_markdown
 
 
+
+def _utf8(text: str) -> bytes:
+    """write_text() would translate \\n to the platform separator; these tests
+    assert on exact bytes, so they must write exact bytes."""
+    return text.encode("utf-8")
+
+
 def test_csv_becomes_a_table(tmp_path: Path) -> None:
     source = tmp_path / "donors.csv"
-    source.write_text("Name,City\nDorothy Fields,Springfield\n", encoding="utf-8")
+    source.write_bytes(_utf8("Name,City\nDorothy Fields,Springfield\n"))
 
     md = to_markdown(source)
 
@@ -51,17 +58,17 @@ def test_docx_becomes_paragraphs_and_tables(tmp_path: Path) -> None:
 
 def test_text_passes_through_and_pipes_are_escaped(tmp_path: Path) -> None:
     source = tmp_path / "notes.txt"
-    source.write_text("Plain text stays as is.\n", encoding="utf-8")
+    source.write_bytes(_utf8("Plain text stays as is.\n"))
     assert to_markdown(source) == "Plain text stays as is.\n"
 
     csv_source = tmp_path / "weird.csv"
-    csv_source.write_text('Notes\n"has | a pipe"\n', encoding="utf-8")
+    csv_source.write_bytes(_utf8('Notes\n"has | a pipe"\n'))
     assert "has \\| a pipe" in to_markdown(csv_source)
 
 
 def test_export_markdown_writes_file(tmp_path: Path) -> None:
     source = tmp_path / "notes.md"
-    source.write_text("# Heading\n", encoding="utf-8")
+    source.write_bytes(_utf8("# Heading\n"))
     dest = tmp_path / "out.md"
 
     export_markdown(source, dest)

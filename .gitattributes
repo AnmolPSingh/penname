@@ -1,0 +1,14 @@
+# Round-trip integrity is a byte-for-byte promise, so the test fixtures must be
+# the same bytes on every platform. Without this, git's autocrlf rewrites the
+# text fixtures to CRLF when checked out on Windows, and the identity tests end
+# up comparing against a file the other platforms never saw.
+tests/fixtures/** -text
+
+# Binary assets: never touch these.
+*.png binary
+*.ico binary
+*.icns binary
+*.xlsx binary
+*.docx binary
+*.pdf binary
+*.pnmap binary

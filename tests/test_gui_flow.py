@@ -48,7 +48,9 @@ def test_flow_scan_review_export_reverse(qtbot, tmp_path: Path) -> None:
     dest = tmp_path / "letter.pen.txt"
     mapping_path, markdown_path = flow.export(dest, also_markdown=True)
     assert dest.exists() and mapping_path.exists() and markdown_path.exists()
-    exported = dest.read_text(encoding="utf-8")
+    # Bytes, not read_text: read_text normalises CRLF and would quietly
+    # break the byte-identity assertion below on Windows.
+    exported = dest.read_bytes().decode("utf-8")
     assert "Director of Development" not in exported
     assert kept in exported  # the value the user chose to keep
 

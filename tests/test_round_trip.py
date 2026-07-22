@@ -81,3 +81,35 @@ def test_empty_and_pii_free_text_pass_through() -> None:
     for text in ("", "   \n\n", "The quarterly newsletter is ready for layout review."):
         result = session.pseudonymize(text)
         assert session.reverse(result.text, result.mapping) == text
+
+
+@pytest.mark.parametrize(
+    "newline", ["\n", "\r\n", "\r"], ids=["lf", "crlf", "cr"]
+)
+def test_round_trip_preserves_line_endings(newline: str, tmp_path: Path) -> None:
+    """A Windows-authored document uses CRLF, and byte-identity means the
+    restored file carries exactly those bytes back. Nothing covered this until
+    the Windows CI leg was un-masked.
+    """
+    from penname.core.io.text import read_document, write_document
+    from penname.core.replace.applier import reverse_text
+
+    original = newline.join(
+        [
+            "Dear Margaret Wilson,",
+            "Thank you for your gift of $25,000 to Riverside Community Foundation.",
+            "Please contact s.chen@riversidecf.org with any questions.",
+            "",
+        ]
+    )
+    source = tmp_path / "letter.txt"
+    write_document(source, original)
+    assert source.read_bytes() == original.encode("utf-8")  # writer is faithful
+
+    session = PennameSession()
+    result = session.pseudonymize(read_document(source))
+    assert result.text != original  # something was actually replaced
+
+    dest = tmp_path / "restored.txt"
+    write_document(dest, reverse_text(result.text, result.mapping))
+    assert dest.read_bytes() == source.read_bytes()
