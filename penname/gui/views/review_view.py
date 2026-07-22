@@ -14,8 +14,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from penname.gui.models import COL_ORIGINAL, ReviewModel
+from penname.gui.models import COL_ORIGINAL, COL_TYPE, ReviewModel
 from penname.gui.theme import tokens as t
+from penname.gui.widgets import PillDelegate
 
 BANNER_TEXT = (
     "Penname reduces what you share. It does not make data anonymous. "
@@ -40,20 +41,25 @@ class ReviewView(QWidget):
         layout.addWidget(heading)
 
         banner = QLabel(BANNER_TEXT)
-        banner.setProperty("role", "banner")
+        banner.setProperty("role", "notice")
         banner.setWordWrap(True)
         layout.addWidget(banner)
+        layout.addSpacing(t.SPACE_8)
 
         self.model = ReviewModel(self)
         self.table = QTableView()
         self.table.setModel(self.model)
-        self.table.setAlternatingRowColors(True)
+        self.table.setAlternatingRowColors(False)  # flat sheet, not a zebra grid
+        self.table.setShowGrid(False)
+        self.table.setSelectionBehavior(QTableView.SelectRows)
+        self.table.setItemDelegateForColumn(COL_TYPE, PillDelegate(self.table))
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Stretch)
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # "How sure?"
+        header.setHighlightSections(False)
         self.table.verticalHeader().setVisible(False)
-        self.table.verticalHeader().setDefaultSectionSize(t.HIT_TARGET)
+        self.table.verticalHeader().setDefaultSectionSize(t.ROW_HEIGHT)
         layout.addWidget(self.table, 1)
 
         self.count_label = QLabel("")

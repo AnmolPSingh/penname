@@ -4,11 +4,20 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QFileDialog, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from penname.gui.flow import SUPPORTED_SUFFIXES
 from penname.gui.theme import tokens as t
+from penname.gui.widgets import Card
 
 _FILE_FILTER = (
     "Documents (*.txt *.md *.csv *.xlsx *.docx *.pdf);;All files (*)"
@@ -22,40 +31,68 @@ class OpenView(QWidget):
         super().__init__(parent)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(t.SPACE_32, t.SPACE_32, t.SPACE_32, t.SPACE_32)
-        layout.setSpacing(t.SPACE_16)
+        layout.setSpacing(t.SPACE_8)
 
         heading = QLabel("Open a document")
         heading.setProperty("role", "heading")
         layout.addWidget(heading)
 
         intro = QLabel(
-            "Penname will look for names, dates, contact details, and other "
-            "sensitive values, and suggest a pen name for each one.\n\n"
-            "Everything happens on this computer. Nothing is sent anywhere."
+            "Penname finds the sensitive values and suggests a pen name for each "
+            "one. Everything happens on this computer."
         )
+        intro.setProperty("role", "subhead")
         intro.setWordWrap(True)
         layout.addWidget(intro)
 
+        layout.addSpacing(t.SPACE_24)
+        action_row = QHBoxLayout()
+        action_row.setSpacing(t.SPACE_12)
         self.open_button = QPushButton("Choose a file…")
         self.open_button.setProperty("role", "primary")
-        self.open_button.setMaximumWidth(420)
+        self.open_button.setCursor(Qt.PointingHandCursor)
         self.open_button.clicked.connect(self._choose_file)
-        layout.addWidget(self.open_button)
+        action_row.addWidget(self.open_button)
+        action_row.addStretch(1)
+        action_wrap = QWidget()
+        action_wrap.setLayout(action_row)
+        layout.addWidget(action_wrap)
 
+        self.status = QLabel("")
+        self.status.setProperty("role", "subhead")
+        self.status.setWordWrap(True)
+        layout.addWidget(self.status)
+
+        layout.addSpacing(t.SPACE_32)
+        what = QLabel("What Penname looks for")
+        what.setProperty("role", "section")
+        layout.addWidget(what)
+        layout.addSpacing(t.SPACE_8)
+
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(t.SPACE_12)
+        grid.setVerticalSpacing(t.SPACE_12)
+        cards = [
+            ("Names & organisations", "Donors, staff, trustees, and the groups they belong to."),
+            ("Contact details", "Email addresses, phone numbers, and postal addresses."),
+            ("Gifts & wealth", "Gift amounts, giving histories, and capacity ratings."),
+            ("Codes & IDs", "Constituent IDs, fund, campaign, and appeal codes."),
+        ]
+        for i, (title, body) in enumerate(cards):
+            grid.addWidget(Card(title, body), i // 2, i % 2)
+        grid_wrap = QWidget()
+        grid_wrap.setLayout(grid)
+        layout.addWidget(grid_wrap)
+
+        layout.addSpacing(t.SPACE_16)
         formats = QLabel(
-            "Works with: Word (.docx), Excel (.xlsx), spreadsheets saved as CSV, "
-            "plain text (.txt, .md), and PDFs.\n"
-            "For a PDF, Penname reads the text and gives you a Markdown copy. "
-            "Scanned PDFs (pictures of pages) can't be read yet — please copy "
-            "that text into a Word or text file first."
+            "Works with Word (.docx), Excel (.xlsx), CSV, plain text (.txt, .md), "
+            "and PDFs. A PDF comes back as a Markdown copy; scanned PDFs "
+            "(pictures of pages) can't be read yet."
         )
         formats.setProperty("role", "helper")
         formats.setWordWrap(True)
         layout.addWidget(formats)
-
-        self.status = QLabel("")
-        self.status.setWordWrap(True)
-        layout.addWidget(self.status)
         layout.addStretch(1)
 
     def _choose_file(self) -> None:

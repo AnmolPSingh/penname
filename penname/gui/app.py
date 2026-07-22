@@ -31,6 +31,7 @@ from penname.gui.views.export_view import ExportView
 from penname.gui.views.open_view import OpenView
 from penname.gui.views.review_view import ReviewView
 from penname.gui.views.reverse_view import ReverseView
+from penname.gui.widgets import centered_column
 
 NAV_ITEMS = ("1.  Open", "2.  Review", "3.  Export", "Take pen names off")
 PAGE_OPEN, PAGE_REVIEW, PAGE_EXPORT, PAGE_REVERSE, PAGE_ABOUT = range(5)
@@ -59,6 +60,7 @@ class MainWindow(QMainWindow):
         self.export_view = ExportView()
         self.reverse_view = ReverseView()
         self.about_view = AboutView()
+        # DESIGN.md: the main column is centred and capped at 900px.
         for view in (
             self.open_view,
             self.review_view,
@@ -66,7 +68,7 @@ class MainWindow(QMainWindow):
             self.reverse_view,
             self.about_view,
         ):
-            self.pages.addWidget(view)
+            self.pages.addWidget(centered_column(view))
         root.addWidget(self.pages, 1)
 
         self._wire()
@@ -83,19 +85,37 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(t.SPACE_16, t.SPACE_24, t.SPACE_16, t.SPACE_24)
         layout.setSpacing(t.SPACE_8)
 
+        # Brand mark: the nib anchors the rail, per DESIGN.md's Sidebar Brand Mark.
+        brand_row = QHBoxLayout()
+        brand_row.setSpacing(t.SPACE_8)
+        mark = QLabel()
+        mark_pm = QPixmap(asset_path("penname-icon.png"))
+        if not mark_pm.isNull():
+            mark.setPixmap(mark_pm.scaledToHeight(26, Qt.SmoothTransformation))
+        brand_row.addWidget(mark)
         brand = QLabel("Penname")
         brand.setProperty("role", "brand")
-        layout.addWidget(brand)
-
-        tagline = QLabel("Pen names for sensitive values")
-        tagline.setProperty("role", "helper")
-        tagline.setWordWrap(True)
-        layout.addWidget(tagline)
+        brand_row.addWidget(brand)
+        brand_row.addStretch(1)
+        brand_wrap = QWidget()
+        brand_wrap.setLayout(brand_row)
+        layout.addWidget(brand_wrap)
         layout.addSpacing(t.SPACE_24)
+
+        workflow_label = QLabel("Workflow")
+        workflow_label.setProperty("role", "section")
+        layout.addWidget(workflow_label)
+        layout.addSpacing(t.SPACE_4)
 
         self.nav_group = QButtonGroup(self)
         self.nav_buttons: list[QPushButton] = []
         for i, label in enumerate(NAV_ITEMS):
+            if i == PAGE_REVERSE:  # second group: not a numbered step
+                layout.addSpacing(t.SPACE_16)
+                more_label = QLabel("Afterwards")
+                more_label.setProperty("role", "section")
+                layout.addWidget(more_label)
+                layout.addSpacing(t.SPACE_4)
             button = QPushButton(label)
             button.setProperty("role", "nav")
             button.setCheckable(True)

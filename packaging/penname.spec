@@ -92,6 +92,8 @@ exe = EXE(
     strip=False,
     upx=False,
     console=False,  # GUI app, no terminal window
+    # Windows taskbar/explorer icon (ignored on macOS, which uses the BUNDLE icon).
+    icon=os.path.join(PROJECT_ROOT, "brand", "penname.ico"),
 )
 
 coll = COLLECT(
@@ -107,7 +109,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name="Penname.app",
-    icon=None,
+    icon=os.path.join(PROJECT_ROOT, "brand", "penname.icns"),  # Finder/Dock icon
     bundle_identifier="org.penname.desktop",
     info_plist={
         "NSHighResolutionCapable": True,
