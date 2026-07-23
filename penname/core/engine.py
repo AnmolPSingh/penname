@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 from penname.core.detect.base import EntityDetector
+from penname.core.detect.noise_filter import filter_spans
 from penname.core.replace.applier import apply_replacements, reverse_text, select_spans
 from penname.core.replace.generator import PenNameGenerator
 from penname.core.types import Mapping, MappingEntry, PseudonymizeResult, Span
@@ -57,6 +58,9 @@ class PennameSession:
 
     def _collect_spans(self, text: str) -> list[Span]:
         spans = self._detector.detect(text) if text.strip() else []
+        # Headings and section labels are not donor data. Filter before the
+        # user's own additions, which are explicit and always kept.
+        spans = filter_spans(text, spans)
         for value, entity_type in self._custom_values.items():
             spans.extend(
                 Span(m.start(), m.end(), entity_type, 1.0, value)

@@ -1,0 +1,102 @@
+# Document furniture: words a proposal or report Title Cases as headings and
+# section labels, which the language model then reads as names, organisations
+# or places. One entry per line, lowercase. Comments start with #.
+#
+# Only consulted for language-model guesses (names, organisations, places,
+# groups, dates). Pattern-backed values such as emails, phone numbers, gift
+# amounts, fund codes and constituent IDs are never checked against this list.
+#
+# Trade-off: an organisation genuinely called "Impact" or "Reach" will not be
+# picked up automatically. The review screen's "Add something Penname missed"
+# button covers that case, and it is far rarer than the heading it would
+# otherwise flag on every page.
+
+# --- document structure ---
+abstract
+acknowledgements
+annex
+appendix
+background
+conclusion
+contents
+discussion
+executive summary
+foreword
+glossary
+introduction
+next steps
+overview
+preface
+purpose
+recommendations
+references
+summary
+table of contents
+
+# --- proposal and report sections ---
+aims
+approach
+assumptions
+budget
+deliverables
+evaluation
+findings
+goals
+key findings
+limitations
+methodology
+milestones
+objectives
+outcomes
+outputs
+results
+risks
+scope
+timeline
+
+# --- generic business abstractions ---
+capacity
+delivery
+depth
+engagement
+excellence
+governance
+growth
+impact
+in depth
+innovation
+insight
+insights
+leadership
+partnership
+performance
+quality
+reach
+real value
+scale
+strategy
+sustainability
+value
+value for money
+vision
+
+# --- organisational furniture ---
+board
+committee
+management
+project team
+staff
+steering group
+team
+the board
+trustees
+working group
+
+# --- roles that are titles, not people ---
+chair
+chief executive
+director
+manager
+president
+secretary
+treasurer

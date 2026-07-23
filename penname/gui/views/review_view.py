@@ -19,6 +19,9 @@ from penname.gui.models import COL_ORIGINAL, COL_REPLACE, COL_TYPE, ReviewModel
 from penname.gui.theme import tokens as t
 from penname.gui.widgets import PillDelegate
 
+#: At or above this, a value matched a pattern rather than being guessed at.
+_CERTAIN = 0.85
+
 BANNER_TEXT = (
     "Penname reduces what you share. It does not make data anonymous. "
     "Always review before sending.\n"
@@ -134,17 +137,31 @@ class ReviewView(QWidget):
             self.table.setCurrentIndex(self.proxy.index(0, COL_ORIGINAL))
 
     def _update_count(self) -> None:
-        total = self.model.rowCount()
+        rows = self.model.rows()
+        total = len(rows)
         shown = self.proxy.rowCount()
-        found = (
-            f"Found {total} value{'s' if total != 1 else ''} that may be sensitive. "
-        )
+        # A pattern match (an email address, a code) is a fact. A name is the
+        # language model's opinion. Saying so tells the reader where to look.
+        certain = sum(1 for row in rows if row.score >= _CERTAIN)
+        guessed = total - certain
+
+        parts = [f"Found {total} value{'s' if total != 1 else ''} that may be sensitive."]
         if shown != total:
-            found += f"Showing {shown} of them. "
-        self.count_label.setText(
-            found + "No tool catches everything, so please read your document "
-            "once more before sharing it."
+            parts.append(f"Showing {shown} of them.")
+        if certain:
+            parts.append(
+                f"{certain} matched a known pattern, like an email address or a code."
+            )
+        if guessed:
+            parts.append(
+                f"{guessed} {'is' if guessed == 1 else 'are'} the language model's "
+                "best guess, so check those first."
+            )
+        parts.append(
+            "No tool catches everything. Please read your document once more "
+            "before you share it."
         )
+        self.count_label.setText(" ".join(parts))
 
     def _add_value(self) -> None:
         text, ok = QInputDialog.getText(
