@@ -7,8 +7,14 @@ import penname
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def test_version_is_2() -> None:
-    assert penname.__version__ == "2.0.1"
+def test_version_is_a_public_2_x_release() -> None:
+    # Pinning the exact string breaks CI on every version bump (it did, on
+    # 2.0.3). Assert the shape instead, and that pyproject agrees.
+    import re
+
+    assert re.fullmatch(r"2\.\d+\.\d+", penname.__version__)
+    pyproject = (ROOT / "pyproject.toml").read_text()
+    assert f'version = "{penname.__version__}"' in pyproject
 
 
 def test_attribution_constants() -> None:
@@ -63,7 +69,7 @@ def test_about_view_shows_version_and_copyright(qtbot) -> None:
     view = AboutView()
     qtbot.addWidget(view)
     joined = " ".join(w.text() for w in view.findChildren(QLabel))
-    assert "2.0.1" in joined
+    assert penname.__version__ in joined
     assert "Philanthropel Limited" in joined
 
 
