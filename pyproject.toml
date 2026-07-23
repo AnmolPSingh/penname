@@ -1,6 +1,6 @@
 [project]
 name = "penname"
-version = "2.0.1"
+version = "2.0.3"
 description = "A free, open-source tool for nonprofits by Philanthropel. Gives sensitive values in donor documents a pen name before you share them with an AI assistant, then restores the real values afterwards. Runs entirely on your machine."
 readme = "README.md"
 license = "Apache-2.0"

@@ -1,6 +1,6 @@
 """Penname — a free, open-source tool for nonprofits, by Philanthropel."""
 
-__version__ = "2.0.1"
+__version__ = "2.0.3"
 
 COMPANY = "Philanthropel Limited"
 COPYRIGHT = "© 2026 Philanthropel Limited"
