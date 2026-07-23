@@ -1,10 +1,5 @@
 <p align="center">
-  <img src="brand/penname-logo.png" alt="Penname" width="360">
-</p>
-
-<p align="center">
-  <sub>A free, open-source tool for nonprofits by</sub><br>
-  <img src="brand/philanthropel-logo.png" alt="Philanthropel" width="190">
+  <img src="brand/penname-header.png" alt="Penname — a free, open-source tool for nonprofits by Philanthropel" width="620">
 </p>
 
 <h3 align="center">Hide every donor detail before you share a document with AI.</h3>
@@ -171,9 +166,9 @@ this public code, untouched by anyone. See
 ## Download
 
 <p align="center">
-  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname.dmg"><img src="brand/button-mac.png" alt="Download for Mac" height="52"></a>
+  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname.dmg"><img src="brand/button-mac.png" alt="Download for Mac" height="66"></a>
   &nbsp;&nbsp;
-  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-Setup.exe"><img src="brand/button-windows.png" alt="Download for Windows" height="52"></a>
+  <a href="https://github.com/AnmolPSingh/penname/releases/latest/download/Penname-Setup.exe"><img src="brand/button-windows.png" alt="Download for Windows" height="66"></a>
 </p>
 
 <p align="center"><sub>Free forever · Runs entirely on your computer · © 2026 Philanthropel Limited · <a href="../../releases/latest">all downloads &amp; checksums</a></sub></p>
@@ -333,7 +328,7 @@ Compare the result to the `.sha256` file published with the release.
 ## A free, open-source tool for nonprofits, by Philanthropel
 
 <p align="center">
-  <img src="brand/philanthropel-logo.png" alt="Philanthropel" width="240">
+  <img src="brand/philanthropel-card.png" alt="Philanthropel" width="360">
 </p>
 
 Penname is made and maintained by **Philanthropel**, and given freely to the
