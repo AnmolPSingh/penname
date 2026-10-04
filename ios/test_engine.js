@@ -320,6 +320,12 @@ check("mapping serialises/deserialises", JSON.stringify(back) === JSON.stringify
   check("restore: part of a longer word untouched",
     restoreOf(`${pLast}shire is lovely.`).text === `${pLast}shire is lovely.`);
 
+  check("restore: a first name inside an email or handle is left alone",
+    restoreOf(`write to ${pFirst}.other@example.com or ${pFirst}_x or x.${pLast}@y.org`).text ===
+      `write to ${pFirst}.other@example.com or ${pFirst}_x or x.${pLast}@y.org`);
+  check("restore: a first name at the end of a sentence is still restored",
+    restoreOf(`Thank you, ${pFirst}. See you soon.`).text === "Thank you, Jane. See you soon.");
+
   const det14 = restoreOf(`Dear ${pFirst}, your ${pen("DONATION_AMOUNT")} gift.`);
   check("restore reports what it changed",
     det14.restored === 2 && det14.segments.filter((g) => g.original !== undefined).map((g) => g.original).join("|") === "Jane|$1,000");

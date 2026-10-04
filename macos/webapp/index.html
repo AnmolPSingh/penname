@@ -63,7 +63,7 @@
         <span class="step-label">Step 1 · Open</span>
         <h2>Paste your document</h2>
         <p class="hint">A donor letter, notes, a report — anything you'd like to share with an AI assistant. Or open a text, Markdown or CSV file.</p>
-        <textarea id="input-text" placeholder="Paste the document here…" autocomplete="off" autocapitalize="sentences"></textarea>
+        <textarea id="input-text" placeholder="Paste the document here…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
         <div class="btn-row">
           <button class="btn btn-secondary" id="btn-choose-file">Choose a file</button>
         </div>
@@ -96,7 +96,7 @@
         <div id="review-list"></div>
         <hr class="divider">
         <p class="field-label">Penname missed something? Add it here.</p>
-        <input type="text" id="add-value-input" placeholder="Exact text to replace, e.g. 340 families" autocomplete="off">
+        <input type="text" id="add-value-input" placeholder="Exact text to replace, e.g. 340 families" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
         <div class="btn-row">
           <button class="btn btn-secondary" id="btn-add-value">Add to list</button>
         </div>
@@ -151,15 +151,17 @@
       <p class="hint">Paste your assistant's reply, choose the key file you saved in Step 3, and the real details return. This happens on this device — the restored text is never shared.</p>
 
       <p class="field-label">Your assistant's reply</p>
-      <textarea id="restore-input" class="small" placeholder="Paste the reply here…"></textarea>
+      <textarea id="restore-input" class="small" placeholder="Paste the reply here…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
 
       <p class="field-label">Key file</p>
       <div class="btn-row" style="margin-top:0">
         <button class="btn btn-secondary" id="btn-choose-key">Choose .pnmap file</button>
       </div>
-      <!-- No accept filter: iOS greys out files with an unregistered extension
-           such as .pnmap. The file is validated when it is opened. -->
-      <input type="file" id="key-input" class="hidden">
+      <!-- iOS decides whether to offer the camera and photo library from the
+           MIME types: with none (or only an extension) it offers both. A
+           non-media MIME type sends the picker straight to Files. .pnmap is
+           also registered as a file type in the iOS app's Info.plist. -->
+      <input type="file" id="key-input" class="hidden" accept=".pnmap,application/octet-stream">
       <p class="count-line" id="key-file-name" style="margin-top:8px">No key file chosen.</p>
 
       <p class="field-label">Passphrase</p>

@@ -887,8 +887,15 @@ function boundaryOk(text, i, item) {
   const first = item.form[0];
   const last = item.form[item.form.length - 1];
   if (item.guard === "word") {
-    // Reshaped forms are short and common-looking: whole words only.
-    return !(isWordChar(first) && isWordChar(before)) && !(isWordChar(last) && isWordChar(after));
+    // Reshaped forms are short and common-looking: whole words only, and
+    // never a piece of an email address or handle ("ronald.smith@x.org",
+    // "ronald_s"). A full stop that ends a sentence is fine.
+    const joins = (ch) => ch === "." || ch === "@" || ch === "_";
+    const end = i + item.form.length;
+    const gluedAfter = joins(after) && isWordChar(text[end + 1]);
+    const gluedBefore = joins(before) && isWordChar(text[i - 2]);
+    return !(isWordChar(first) && (isWordChar(before) || gluedBefore)) &&
+      !(isWordChar(last) && (isWordChar(after) || gluedAfter));
   }
   if (item.guard === "digits") {
     return !(isDigit(first) && isDigit(before)) &&

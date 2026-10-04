@@ -28,6 +28,27 @@
 	<string>Main</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Registers .pnmap so the file picker recognises Penname key files. -->
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.philanthropel.penname.keyfile</string>
+			<key>UTTypeDescription</key>
+			<string>Penname key file</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>pnmap</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>arm64</string>
