@@ -38,13 +38,10 @@ compliant by itself and it is not a legal tool. Always review the safe copy —
 the app shows you everything it found and lets you add anything it missed.
 
 ## Support URL
-https://philanthropel.com/support      (must exist before submission)
+https://philanthropel.com/support      (live)
 
 ## Privacy Policy URL (REQUIRED by App Store Connect)
-https://philanthropel.com/privacy      (must exist before submission)
-Suggested text: "Penname processes all documents entirely on your device. We
-collect no personal data, no analytics and no diagnostics. The Activity log is
-encrypted and stored only on your device."
+https://philanthropel.com/privacy      (live; includes a Penname section)
 
 ## Age rating answers
 No violence, gambling, user content, web content, or data sharing → 4+
