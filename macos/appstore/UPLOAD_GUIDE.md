@@ -21,7 +21,6 @@ Not yet verified — needs a person at the keyboard or a real signature:
   through WebKit, which keeps a "Penname WebCrypto Master Key" item in the
   Keychain. Re-signed test builds trigger a Keychain prompt; a build with
   one stable signature should not. Check this on the first signed build.
-- Mac screenshots.
 - App Review. Version 1.0.0 was uploaded and passed Apple's upload checks;
   it has not been reviewed.
 
@@ -66,6 +65,8 @@ readable crash reports are.
 
 ## Screenshots
 
-Mac App Store sizes: 1280×800, 1440×900, 2560×1600 or 2880×1800. Use the
-same five screens as iOS: Protect, Review list, Safe copy and key file,
-Restore with highlights, Activity.
+Ready in `macos/appstore/screenshots/`: five at 2880 × 1800, in upload
+order (Protect, Review list, Safe copy and key file, Restore with
+highlights, How it works). They were rendered from the app's own interface
+at Mac window size with a sample letter of invented details; they show the
+window's contents without the title bar.
