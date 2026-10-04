@@ -1,0 +1,12 @@
+{
+  "appId": "com.philanthropel.penname",
+  "appName": "Penname",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#f7f5f1"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

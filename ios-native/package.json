@@ -1,0 +1,14 @@
+{
+  "name": "penname-ios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Penname for iOS — native shell (Capacitor) around the Penname Mobile web app",
+  "scripts": {
+    "sync": "rsync -a ../ios/index.html ../ios/style.css ../ios/app.js ../ios/engine.js ../ios/activity.js ../ios/sw.js ../ios/manifest.webmanifest www/ && rsync -a --delete ../ios/icons/ www/icons/ && rsync -a --delete ../ios/fonts/ www/fonts/ && npx cap copy ios && cd ios/App && pod install"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^7.6.8",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0"
+  }
+}

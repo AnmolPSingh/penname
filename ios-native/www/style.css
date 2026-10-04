@@ -1,0 +1,487 @@
+/* ================================================================
+   Penname Mobile — Philanthropel brand guidelines (philanthropel.com)
+   Structure: "Claude" DESIGN.md component system
+   (voltagent/awesome-design-md · design-md/claude)
+
+   Brand tokens extracted from the live site:
+     emerald #0c3b32 · emerald-deep/ink #071c18 · emerald-mid #103f38
+     paper #f7f5f1 · mist #f4f2ef · amber #f2b655
+     teal #1e7a6b · teal-bright #3cc2a4 · mint #7fe2cc · sage #a8bda4
+     terracotta #d98462 · destructive #ff6568 (dark-bg; darkened for paper)
+   Type: Urbanist (variable 400–800) + IBM Plex Mono — bundled locally,
+   so the app still makes zero network requests.
+   ================================================================ */
+@font-face {
+  font-family: "Urbanist";
+  src: url("fonts/Urbanist-Variable.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("fonts/IBMPlexMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("fonts/IBMPlexMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Brand — Philanthropel */
+  --emerald: #0c3b32;
+  --emerald-mid: #103f38;
+  --emerald-deep: #071c18;
+  --paper: #f7f5f1;
+  --mist: #f4f2ef;
+  --amber: #f2b655;
+  --teal: #1e7a6b;
+  --teal-bright: #3cc2a4;
+  --mint: #7fe2cc;
+  --sage: #a8bda4;
+  --terracotta: #d98462;
+  --destructive: #b8383a;   /* brand #ff6568 darkened for paper contrast */
+
+  /* Semantic roles */
+  --canvas: var(--paper);
+  --surface-card: var(--mist);
+  --surface-strong: #ece9e3;
+  --ink: var(--emerald-deep);
+  --body-text: #1c1c1a;
+  --muted: rgba(7, 28, 24, 0.62);
+  --muted-soft: rgba(7, 28, 24, 0.45);
+  --hairline: rgba(7, 28, 24, 0.14);
+  --hairline-soft: rgba(7, 28, 24, 0.08);
+  --on-primary: #f7f5f1;
+  --primary: var(--emerald);
+  --primary-active: var(--emerald-deep);
+  --primary-disabled: #e3e0da;
+  --accent: var(--amber);
+  --success: var(--teal-bright);
+  --error: var(--destructive);
+
+  /* Dark product-chrome surface (site's bg-deep) */
+  --surface-dark: var(--emerald-deep);
+  --surface-dark-elevated: var(--emerald-mid);
+  --on-dark: var(--paper);
+  --on-dark-soft: var(--sage);
+
+  /* Radius — hierarchical: 8 buttons/inputs · 12 cards · pill badges */
+  --rounded-sm: 6px;
+  --rounded-md: 8px;
+  --rounded-lg: 12px;
+  --rounded-xl: 16px;
+  --rounded-pill: 9999px;
+
+  /* Spacing — 4px base */
+  --sp-xxs: 4px; --sp-xs: 8px; --sp-sm: 12px; --sp-md: 16px;
+  --sp-lg: 24px; --sp-xl: 32px;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Type — Urbanist everywhere, IBM Plex Mono for product chrome */
+  --font-body: "Urbanist", -apple-system, "SF Pro Text", BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Urbanist", -apple-system, "SF Pro Text", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--body-text);
+  background: var(--canvas);
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+#app { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.content { display: flex; flex-direction: column; flex: 1; min-height: 100vh; min-height: 100dvh; }
+
+/* ---------- Sidebar — iPad / MacBook (≥768px) ---------- */
+.sidebar { display: none; }
+
+/* ---------- Header ---------- */
+.header {
+  position: sticky; top: 0; z-index: 10;
+  padding: calc(var(--safe-top) + 12px) 20px 12px;
+  background: rgba(247, 245, 241, 0.94);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hairline);
+}
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.header .subtitle {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ---------- Views ---------- */
+.view { display: none; flex: 1; padding: var(--sp-md) 20px calc(80px + var(--safe-bottom) + 16px); }
+.view.active { display: block; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--rounded-lg);
+  padding: var(--sp-md);
+  margin-bottom: var(--sp-md);
+}
+.card h2 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.card .hint { font-size: 14px; color: var(--muted); margin-bottom: var(--sp-sm); }
+.card .hint strong { color: var(--ink); font-weight: 600; }
+
+/* Step label — uppercase, tracked (site: tracking 0.14–0.18em) */
+.step-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  background: transparent;
+  margin-bottom: var(--sp-xs);
+}
+
+/* ---------- Inputs ---------- */
+textarea, input[type="text"], input[type="password"], input[type="search"] {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--rounded-md);
+  padding: 10px 14px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+textarea:focus, input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(60, 194, 164, 0.18);
+}
+textarea { min-height: 160px; resize: vertical; line-height: 1.55; }
+textarea.small { min-height: 96px; }
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: var(--sp-sm) 0 6px;
+}
+.field-label:first-child { margin-top: 0; }
+
+/* ---------- Buttons — emerald primary, amber reserved for emphasis ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  border: none;
+  border-radius: var(--rounded-md);
+  padding: 14px 20px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: transform 0.06s ease, background-color 0.15s ease, opacity 0.15s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary); color: var(--on-primary); width: 100%; }
+.btn-primary:active { background: var(--primary-active); }
+.btn-teal { background: var(--ink); color: var(--on-dark); width: 100%; }
+.btn-teal:active { background: var(--emerald-mid); }
+.btn-secondary {
+  background: var(--canvas);
+  color: var(--ink);
+  border: 1px solid var(--hairline);
+  width: 100%;
+}
+.btn-small {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  width: auto;
+  background: var(--canvas);
+  color: var(--ink);
+  border: 1px solid var(--hairline);
+  border-radius: var(--rounded-md);
+}
+.btn-danger-text { color: var(--error); }
+.btn[disabled] { background: var(--primary-disabled); color: var(--muted); pointer-events: none; }
+.btn-row { display: flex; gap: 10px; margin-top: var(--sp-sm); }
+.btn-row .btn { flex: 1; }
+.stack > .btn { margin-top: 10px; }
+.stack > .btn:first-child { margin-top: 0; }
+
+/* ---------- Review list ---------- */
+.toolbar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: var(--sp-sm); flex-wrap: wrap;
+}
+.toolbar input[type="search"] {
+  flex: 1; min-width: 140px;
+  padding: 9px 14px;
+  border-radius: var(--rounded-pill);
+}
+
+.entry {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--rounded-lg);
+  padding: var(--sp-sm);
+  margin-bottom: 10px;
+}
+.entry.off { opacity: 0.5; }
+.entry .grow { flex: 1; min-width: 0; }
+.entry .original {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.entry .meta { display: flex; gap: 6px; align-items: center; margin: 4px 0 8px; flex-wrap: wrap; }
+
+/* Badge pill — sage-tinted */
+.chip {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--emerald);
+  background: rgba(60, 194, 164, 0.14);
+  border-radius: var(--rounded-pill);
+  padding: 3px 10px;
+}
+.confidence { font-size: 12px; color: var(--muted-soft); }
+.entry input.pen-input {
+  padding: 9px 12px;
+  font-size: 14px;
+  border-radius: var(--rounded-sm);
+  background: var(--canvas);
+}
+
+/* iOS-style checkbox — emerald when checked */
+.entry input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  width: 26px; height: 26px; flex: none;
+  border: 1.5px solid var(--hairline);
+  border-radius: var(--rounded-sm);
+  background: var(--canvas);
+  margin-top: 2px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.entry input[type="checkbox"]:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.entry input[type="checkbox"]:checked::after {
+  content: ""; width: 12px; height: 7px;
+  border-left: 2.5px solid var(--on-primary);
+  border-bottom: 2.5px solid var(--on-primary);
+  transform: rotate(-45deg) translate(0.5px, -1px);
+}
+
+.count-line { font-size: 13px; color: var(--muted); margin-bottom: var(--sp-sm); }
+.count-line strong { color: var(--ink); font-weight: 600; }
+
+/* ---------- Output — dark emerald product chrome, mint mono ---------- */
+.output {
+  background: var(--surface-dark);
+  color: var(--on-dark);
+  border: none;
+  border-radius: var(--rounded-lg);
+  padding: var(--sp-sm) 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 320px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Success note — teal-bright edge, per brand's sparing bright-teal use */
+.success-note {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: rgba(60, 194, 164, 0.12);
+  border: 1px solid rgba(60, 194, 164, 0.25);
+  border-radius: var(--rounded-md);
+  padding: 10px 12px;
+  margin-top: var(--sp-sm);
+}
+
+/* ---------- Tab bar ---------- */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  display: flex;
+  background: rgba(247, 245, 241, 0.94);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--hairline);
+  padding-bottom: var(--safe-bottom);
+}
+.tabbar button {
+  flex: 1; background: none; border: none; cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 8px 0 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.tabbar button svg { width: 26px; height: 26px; }
+.tabbar button.active { color: var(--teal); }
+
+/* Sidebar internals (shown only ≥768px, see media query below) */
+.sidebar nav { display: flex; flex-direction: column; gap: 4px; }
+.sidebar nav button {
+  display: flex; align-items: center; gap: 12px;
+  font: inherit; font-size: 15px; font-weight: 600;
+  color: var(--muted);
+  background: transparent; border: none; border-radius: var(--rounded-md);
+  padding: 11px 14px; cursor: pointer; text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.sidebar nav button svg { width: 22px; height: 22px; flex: none; }
+.sidebar nav button:hover { background: rgba(7, 28, 24, 0.05); color: var(--ink); }
+.sidebar nav button.active {
+  background: rgba(60, 194, 164, 0.14);
+  color: var(--emerald);
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 8px 20px;
+}
+.sidebar-brand img { width: 34px; height: 34px; border-radius: 8px; }
+.sidebar-brand span {
+  font-family: var(--font-display);
+  font-size: 19px; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.sidebar-foot {
+  margin-top: auto;
+  font-size: 12px; font-weight: 500;
+  color: var(--muted-soft);
+  padding: 0 8px;
+}
+
+/* ---------- Misc ---------- */
+.hidden { display: none !important; }
+.error-note {
+  font-size: 13px;
+  color: var(--error);
+  background: rgba(184, 56, 58, 0.08);
+  border-radius: var(--rounded-md);
+  padding: 10px 12px;
+  margin-top: var(--sp-sm);
+}
+.divider { border: none; border-top: 1px solid var(--hairline-soft); margin: var(--sp-md) 0; }
+.about p { font-size: 14px; color: var(--body-text); margin-bottom: 10px; }
+.about strong { color: var(--ink); font-weight: 600; }
+.brand-row { display: flex; align-items: center; gap: 12px; margin-bottom: var(--sp-sm); }
+.brand-row img { width: 44px; height: 44px; border-radius: var(--rounded-md); }
+.brand-row .name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.brand-row .tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+/* "By Philanthropel" credit row on the About card */
+.philanthropel-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 var(--sp-md);
+  padding: 10px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--rounded-md);
+  background: var(--surface-card);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.philanthropel-row img { height: 18px; width: auto; display: block; }
+.philanthropel-row .philanthropel-url {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal, #1e7a6b);
+  white-space: nowrap;
+}
+.philanthropel-row:active { opacity: 0.7; }
+@media (min-width: 640px) {
+  .philanthropel-row:hover { border-color: var(--teal, #1e7a6b); }
+  .philanthropel-row:hover .philanthropel-url { text-decoration: underline; }
+}
+
+@media (min-width: 640px) {
+  .view { max-width: 680px; margin: 0 auto; width: 100%; }
+}
+
+/* iPad / MacBook: sidebar navigation replaces the tab bar */
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex; flex-direction: column;
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 30;
+    width: 248px;
+    padding: calc(var(--safe-top) + 20px) 14px calc(var(--safe-bottom) + 20px);
+    background: var(--mist);
+    border-right: 1px solid var(--hairline);
+  }
+  .content { margin-left: 248px; }
+  .tabbar { display: none; }
+  .view { padding-bottom: 48px; }
+  .card { padding: var(--sp-lg); }
+  .header { padding-left: 0; padding-right: 0; }
+  .view, .header { max-width: 760px; }
+  .header { margin: 0 auto; width: 100%; }
+  .view { margin: 0 auto; width: 100%; }
+}

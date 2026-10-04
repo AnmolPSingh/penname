@@ -1,0 +1,17 @@
+{
+  "name": "Penname",
+  "short_name": "Penname",
+  "description": "Give private donor details a pen name before you share a document with AI — then bring the real details back. Runs entirely on your device.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f5f1",
+  "theme_color": "#f7f5f1",
+  "categories": ["productivity", "utilities", "business"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
