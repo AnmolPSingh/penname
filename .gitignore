@@ -33,3 +33,4 @@ macos/src-tauri/gen/
 entitlements-store.plist
 *.pkg
 *.p12
+ios-native/appstore/export/
