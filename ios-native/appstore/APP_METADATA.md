@@ -54,6 +54,6 @@ Info.plist sets ITSAppUsesNonExemptEncryption=false (standard AES-256 used
 only to protect the user's own data at rest). Answer "standard encryption,
 exempt" in the yearly declaration.
 
-## Screenshots required
-- iPhone 6.9"/6.5" class: 1290×2796 (use phone screenshots from ios/screenshots)
-- iPad 13" class: 2064×2752 (use ipad screenshots)
+## Screenshots
+See `screenshots/` (iPhone 6.9": 1320×2868, iPad 13": 2064×2752) and the
+order in REVIEW_NOTES.md.

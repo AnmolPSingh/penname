@@ -70,11 +70,14 @@ bundled under the SIL Open Font License.
 
 ## Screenshots to upload
 
-- iPhone 6.9": 1290 × 2796 — Protect, Review list, Safe copy + key file,
-  Restore with highlights, Activity
-- iPad 13": 2064 × 2752 — the same five screens
+Ready in `ios-native/appstore/screenshots/`, taken from build 2 on the
+simulators with a sample donor letter (all names and details are invented):
 
-These are produced from the simulator once the app runs there.
+- `iphone-6.9/` — 1320 × 2868, for the iPhone 6.9" slot
+- `ipad-13/` — 2064 × 2752, for the iPad 13" slot
+
+Five in each, in this order: 01 Protect, 02 Review list, 03 Safe copy and
+key file, 04 Restore with highlights, 05 How it works.
 
 ## Likely review questions
 
