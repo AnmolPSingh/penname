@@ -27,6 +27,7 @@ ios/
 ├── style.css             Brand tokens from tokens.json, iOS-native feel
 ├── app.js                UI logic (in-memory state only, nothing persisted)
 ├── engine.js             Faithful JS port of penname/core (see below)
+├── gazetteer.js          First names and places, for details that stand alone
 ├── sw.js                 Service worker — works fully offline
 ├── manifest.webmanifest  Install metadata (standalone display, icons)
 ├── icons/                App icons generated from brand/penname-icon.png
@@ -184,7 +185,8 @@ Safari Add to Home Screen — use that while the App Store version is in review.
 cd ios && node test_engine.js
 ```
 
-26 assertions covering: detection of every entity class, round-trip integrity,
+About 90 checks covering: detection of every entity class (including UK phone,
+postcode and date formats, lone first names and places), round-trip integrity,
 cross-document consistency, review actions (ignore / pin / custom values), the
 desktop-compatible mapping schema, encryption round-trip + wrong-passphrase rejection,
 AI-reply restoration, and a **200-document fuzz** asserting the round-trip property

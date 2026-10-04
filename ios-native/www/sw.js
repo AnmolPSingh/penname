@@ -3,12 +3,13 @@
  * app's own files so it keeps working with no connection at all. */
 "use strict";
 
-const CACHE = "penname-v4";
+const CACHE = "penname-v5";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
+  "./gazetteer.js",
   "./engine.js",
   "./activity.js",
   "./manifest.webmanifest",

@@ -2,9 +2,10 @@
   "name": "penname-ios",
   "version": "1.0.0",
   "private": true,
-  "description": "Penname for iOS — native shell (Capacitor) around the Penname Mobile web app",
+  "description": "Penname for iOS \u2014 native shell (Capacitor) around the Penname Mobile web app",
   "scripts": {
-    "sync": "rsync -a ../ios/index.html ../ios/style.css ../ios/app.js ../ios/engine.js ../ios/activity.js ../ios/sw.js ../ios/manifest.webmanifest www/ && rsync -a --delete ../ios/icons/ www/icons/ && rsync -a --delete ../ios/fonts/ www/fonts/ && npx cap copy ios && cd ios/App && pod install"
+    "sync": "rsync -a ../ios/index.html ../ios/style.css ../ios/app.js ../ios/gazetteer.js ../ios/engine.js ../ios/activity.js ../ios/sw.js ../ios/manifest.webmanifest www/ && rsync -a --delete ../ios/icons/ www/icons/ && rsync -a --delete ../ios/fonts/ www/fonts/ && rsync -a www/ ios/App/App/public/ && echo 'www and the iOS bundle synced from ../ios'",
+    "cap:sync": "cap sync ios"
   },
   "dependencies": {
     "@capacitor/cli": "^7.6.8",

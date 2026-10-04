@@ -11,7 +11,7 @@ const TYPE_LABELS = {
   ORGANIZATION: "Organisation",
   EMAIL_ADDRESS: "Email",
   PHONE_NUMBER: "Phone",
-  LOCATION: "Address",
+  LOCATION: "Address or place",
   DATE_TIME: "Date",
   DONATION_AMOUNT: "Amount",
   WEALTH_RATING: "Wealth rating",
@@ -28,6 +28,7 @@ const TYPE_LABELS = {
 };
 
 const MIN_PASSPHRASE = 8;
+const MAX_DOCUMENT_CHARS = 1000000; // ~1 MB of text; larger files stall a phone
 
 /* In the iOS app (and iOS Safari) a download link does nothing useful, so
  * files go through the system share sheet, which offers "Save to Files".
@@ -74,6 +75,10 @@ document.querySelectorAll("[data-tab]").forEach((btn) => {
 $("btn-detect").addEventListener("click", () => {
   const text = $("input-text").value;
   if (!text.trim()) { showProtectError("Paste or choose a document first."); return; }
+  if (text.length > MAX_DOCUMENT_CHARS) {
+    showProtectError("This document is too large to check in one go (over 1 MB of text). Split it into smaller parts.");
+    return;
+  }
   hideProtectError();
   state.session = new E.PennameSession();
   state.sourceText = text;
@@ -91,6 +96,13 @@ $("btn-choose-file").addEventListener("click", () => $("file-input").click());
 $("file-input").addEventListener("change", async (ev) => {
   const file = ev.target.files[0];
   if (!file) return;
+  // Checked before reading, so a huge file is never loaded into memory.
+  if (file.size > 2 * MAX_DOCUMENT_CHARS) {
+    showProtectError("This file is too large to open here (over 2 MB). Split it into smaller parts.");
+    ev.target.value = "";
+    return;
+  }
+  hideProtectError();
   const text = await file.text();
   $("input-text").value = text;
   state.fileName = file.name;

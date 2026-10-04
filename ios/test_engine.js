@@ -118,6 +118,16 @@ check("mapping serialises/deserialises", JSON.stringify(back) === JSON.stringify
     ["name across a line break", "Regards\nJane Smith\nDirector of Giving", ["Jane Smith"]],
     ["title followed by a greeting", "Thanks, Mrs Wilson Dear Jane Smith, hello", ["Wilson", "Jane", "Smith"]],
     ["names side by side", "the Jane Smith Jane Smith Margaret.", ["Jane", "Smith", "Margaret"]],
+    ["lone first name", "Thanks to Margaret for her gift.", ["Margaret"]],
+    ["lone first name at sentence start", "Siobhan called about the legacy.", ["Siobhan"]],
+    ["city", "He moved to Manchester in May.", ["Manchester"]],
+    ["city after an address", "12 High Street, Bristol BS1 4DJ.", ["Bristol"]],
+    ["amount with a currency code", "A gift of 10,000 GBP arrived.", ["10,000"]],
+    ["amount in pounds, spelled", "She pledged 2,500 pounds.", ["2,500"]],
+    ["currency code first", "Total: USD 12,500.00", ["12,500"]],
+    ["dotted date", "Received 05.01.2024.", ["05.01.2024"]],
+    ["UK-order slash date", "Born 25/12/1948.", ["25/12/1948"]],
+    ["www address", "See www.smithfamilytrust.org for more.", ["smithfamilytrust"]],
     ["UK postcode", "12 High Street, Bristol BS1 4DJ.", ["BS1 4DJ"]],
     ["UK mobile, no spaces", "Call 07700900123 any time.", ["07700900123"]],
     ["international, no spaces", "Call +447700900123 any time.", ["447700900123"]],
@@ -263,6 +273,28 @@ check("mapping serialises/deserialises", JSON.stringify(back) === JSON.stringify
     } catch (e) { gluedOk = false; }
   }
   check("date clashes are retried with different dates", gluedOk);
+
+  // 13g. Ordinary words that happen to be names or places stay untouched
+  const plain = "We will mark the occasion in May. Reading the report gave us hope. Please bath the dog.";
+  check("everyday words are not treated as names or places", E.detectSpans(plain).length === 0);
+
+  const urlDoc = "See www.smithtrust.org. Or https://give.example.net/x, thanks.";
+  const urlSpans = E.detectSpans(urlDoc).filter((x) => x.entity_type === "URL").map((x) => x.text);
+  check("web address leaves the sentence punctuation alone",
+    urlSpans.join("|") === "www.smithtrust.org|https://give.example.net/x");
+
+  // 13h. Dates keep their written shape
+  const gd = new E.PenNameGenerator(1);
+  gd.dateDelta = 40;
+  check("dotted date keeps its shape", gd.penNameFor("DATE_TIME", "05.01.2024", "") === "14.02.2024");
+  check("UK-order slash date keeps its shape", gd.penNameFor("DATE_TIME", "25/12/1948", "") === "03/02/1949");
+
+  // 13i. Pathological input finishes quickly (no quadratic regex)
+  const t13 = Date.now();
+  E.detectSpans("1".repeat(200000));
+  E.detectSpans("A-".repeat(100000));
+  E.detectSpans("a.".repeat(100000));
+  check("long digit/letter runs are scanned in under 2s", Date.now() - t13 < 2000);
 
   // 14. Restore copes with the ways an AI reshapes stand-ins
   const s14 = new E.PennameSession(3);

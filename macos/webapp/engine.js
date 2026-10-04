@@ -14,6 +14,11 @@
  */
 "use strict";
 
+/* Word lists for lone first names and places (see gazetteer.js). */
+const GAZ = typeof module !== "undefined" && module.exports
+  ? require("./gazetteer.js")
+  : window.PennameGazetteer;
+
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -194,11 +199,20 @@ const NE = "(?![\\p{L}\\p{N}])";        // name boundary, after
 const TITLES = "(?:Mr|Mrs|Ms|Miss|Mx|Dr|Prof|Rev|Sir|Dame|Lord|Lady)";
 const nameRe = (body) => new RegExp(`${NB}(${body})${NE}`, "gu");
 
+/** "isle of wight" → "Isle of Wight", "stoke-on-trent" → "Stoke-on-Trent". */
+const placeCase = (place) => place.replace(/[^\s-]+/g, (w) =>
+  (w === "of" || w === "on" ? w : w[0].toUpperCase() + w.slice(1)));
+
 const DETECTORS = [
   { type: "EMAIL_ADDRESS", score: 0.95,
-    re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g },
+    re: /[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,}/g,
+    // Lengths are bounded (as in the email spec): an unbounded local part
+    // rescans to the end of a long run from every position.
+    validate: (m, text, idx) => !/[A-Za-z0-9._%+-]/.test(text[idx - 1] || "") },
   { type: "URL", score: 0.85,
-    re: /https?:\/\/[^\s<>"')\]]+/g },
+    // Ends on a non-punctuation character, so a sentence's full stop or
+    // comma after the address is not swallowed.
+    re: /(?:https?:\/\/|\bwww\.)[^\s<>"')\]]*[^\s<>"')\].,;:!?]/g },
   { type: "CREDIT_CARD", score: 0.9,
     re: /\b\d(?:[ -]?\d){12,18}\b/g,
     validate: (m) => luhnValid(m.replace(/[ -]/g, "")) },
@@ -208,6 +222,11 @@ const DETECTORS = [
     re: /\b\d{3}-\d{2}-\d{4}\b/g },
   { type: "DONATION_AMOUNT", score: 0.85,
     re: /[$£€]\s?(?:\d{1,3}(?:,\d{3})+(?!\d)|\d+)(?:\.\d{1,2}(?!\d))?(?:\s?(?:K|M|million|billion|bn)\b)?/g },
+  // Amounts written with a currency code or word: 10,000 GBP, USD 12,500.00
+  { type: "DONATION_AMOUNT", score: 0.8,
+    re: /\b(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?\s?(?:GBP|USD|EUR|pounds|dollars|euros)\b/g },
+  { type: "DONATION_AMOUNT", score: 0.8,
+    re: /\b(?:GBP|USD|EUR)\s?(?:\d{1,3}(?:,\d{3})+(?!\d)|\d+)(?:\.\d{1,2}(?!\d))?/g },
   { type: "DATE_TIME", score: 0.8,
     re: /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4}\b/gi },
   { type: "DATE_TIME", score: 0.8,
@@ -216,6 +235,10 @@ const DETECTORS = [
     re: /\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?\s+\d{4}\b/g },
   { type: "DATE_TIME", score: 0.75,
     re: /\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/g },
+  // Day-first dotted dates: 05.01.2024
+  { type: "DATE_TIME", score: 0.7,
+    re: /\b\d{1,2}\.\d{1,2}\.(?:\d{4}|\d{2})\b/g,
+    validate: (m) => { const [d, mo] = m.split(".").map(Number); return d >= 1 && d <= 31 && mo >= 1 && mo <= 12; } },
   { type: "DATE_TIME", score: 0.8,
     re: /\b\d{4}-\d{2}-\d{2}\b/g },
   { type: "PHONE_NUMBER", score: 0.7,
@@ -241,9 +264,9 @@ const DETECTORS = [
   { type: "LOCATION", score: 0.85,
     re: /\b[A-Z]{1,2}\d[A-Z\d]?[ \t]?\d[A-Z]{2}\b/g },
   { type: "LOCATION", score: 0.7,
-    re: /\b\d{1,5}\s+[A-Z][A-Za-z.'-]*(?:\s+[A-Z][A-Za-z.'-]*)*\s+(?:Street|St\.?|Avenue|Ave\.?|Road|Rd\.?|Lane|Ln\.?|Drive|Dr\.?|Boulevard|Blvd\.?|Way|Court|Ct\.?|Close|Place|Pl\.?|Terrace|Gardens|Grove|Hill|Park)\b/g },
+    re: /\b\d{1,5}\s+[A-Z][A-Za-z.'-]{0,40}(?:\s+[A-Z][A-Za-z.'-]{0,40}){0,5}\s+(?:Street|St\.?|Avenue|Ave\.?|Road|Rd\.?|Lane|Ln\.?|Drive|Dr\.?|Boulevard|Blvd\.?|Way|Court|Ct\.?|Close|Place|Pl\.?|Terrace|Gardens|Grove|Hill|Park)\b/g },
   { type: "ORGANIZATION", score: 0.8,
-    re: /\b[A-Z][A-Za-z&.'-]*(?:\s+(?:of|for|the|and|[A-Z][A-Za-z&.'-]+)){0,3}\s+(?:Foundation|Trust|Fund|Charity|Charities|Association|Society|CIC|Limited|Ltd\.?|LLC|Inc\.?|University|College|Hospital|Church|School|Academy|Council)\b/g },
+    re: /\b[A-Z][A-Za-z&.'-]{0,40}(?:\s+(?:of|for|the|and|[A-Z][A-Za-z&.'-]{1,40})){0,3}\s+(?:Foundation|Trust|Fund|Charity|Charities|Association|Society|CIC|Limited|Ltd\.?|LLC|Inc\.?|University|College|Hospital|Church|School|Academy|Council)\b/g },
   { type: "PERSON", score: 0.85,
     re: nameRe(`${TITLES}\\.?${NAME_SEP}${NAME_WORD}(?:${NAME_SEP}${NAME_WORD}){0,2}`), group: 1,
     trim: trimTitledName },
@@ -258,6 +281,15 @@ const DETECTORS = [
   { type: "PERSON", score: 0.35,
     re: nameRe(`${CAPS_WORD}(?:${NAME_SEP}${CAPS_WORD}){1,2}`), group: 1,
     validate: personLooksReal, rescue: CAPS_WORD },
+  // A first name on its own ("Thanks to Margaret"). Scored below the
+  // full-name rules so "Patrick O'Brien" stays one name.
+  { type: "PERSON", score: 0.33,
+    re: nameRe(NAME_WORD), group: 1,
+    validate: (m) => GAZ.firstNames.has(m.toLowerCase()) },
+  // A town, city, county or country on its own ("moved to Manchester").
+  { type: "LOCATION", score: 0.5,
+    re: nameRe(GAZ.placeList.map(placeCase).map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")),
+    group: 1 },
   { type: "CONSTITUENT_ID", score: 0.7,
     re: /\b[A-Z]{1,3}-\d{3,8}\b/g },
   { type: "FUND_CODE", score: 0.65,
@@ -362,7 +394,7 @@ function detectSpans(text) {
         if (trimmed.length < raw.length) det.re.lastIndex = idx + trimmed.length;
         raw = trimmed;
       }
-      if (det.validate && !det.validate(raw)) {
+      if (det.validate && !det.validate(raw, text, idx)) {
         const rescued = det.rescue ? rescueName(det, raw, idx, text) : null;
         if (rescued) spans.push(rescued);
         continue;
@@ -459,6 +491,8 @@ class PenNameGenerator {
     const sign = this.rng() < 0.5 ? -1 : 1;
     this.dateDelta = sign * Math.floor(30 + this.rng() * 371); // days
     this.dateBump = 0; // extra years, raised when a document's dates clash
+    this.lonePens = new Set();     // one-word person stand-ins
+    this.fullPenWords = new Set(); // words of multi-word person stand-ins
   }
 
   penNameFor(entityType, original, avoidText) {
@@ -478,15 +512,28 @@ class PenNameGenerator {
       if (entityType === "PERSON" && candidate.split(NAME_SPLIT).some((w) => w.length > 2 && avoidText.includes(w))) {
         return false;
       }
+      // A lone stand-in ("Nora") and a full one ("Nora Lockwood") must not
+      // share a word, or "Dear Nora" in a reply would be ambiguous.
+      if (entityType === "PERSON" && !derivedHalf) {
+        const words = candidate.split(NAME_SPLIT);
+        if (words.length === 1 ? this.fullPenWords.has(candidate) : words.some((w) => this.lonePens.has(w))) {
+          return false;
+        }
+        if (words.length === 1) this.lonePens.add(candidate);
+        else for (const w of words) this.fullPenWords.add(w);
+      }
       this.cache.set(key, candidate);
       this.used.add(candidate);
       return true;
     };
+    let derivedHalf = false;
     // A bare "Smith" after "Jane Smith" reuses the matching half of that
     // person's stand-in, so the safe copy still reads naturally.
     if (entityType === "PERSON" && original.split(NAME_SPLIT).length === 1) {
       const derived = this._nameHalf(original);
+      derivedHalf = true;
       if (derived && accept(derived)) return derived;
+      derivedHalf = false;
     }
     for (let i = 0; i < 50; i++) {
       const candidate = this._generate(entityType, original, i);
@@ -523,6 +570,7 @@ class PenNameGenerator {
     if (pen !== undefined) {
       this.cache.delete(key);
       this.used.delete(pen);
+      this.lonePens.delete(pen);
     }
   }
 
@@ -609,15 +657,24 @@ class PenNameGenerator {
       if (!mo) return null;
       return this._render(m[3], +m[1], m[2] || "", +m[4], original, "uk", delta);
     }
-    if ((m = original.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/))) {
-      let year = +m[3];
+    if ((m = original.match(/^(\d{1,2})([/.])(\d{1,2})\2(\d{2,4})$/))) {
+      // Dotted dates are day-first. Slash dates are read month-first unless
+      // the first number cannot be a month (25/12/2024). The stand-in keeps
+      // the same order and separator.
+      const dayFirst = m[2] === "." || +m[1] > 12;
+      const day = dayFirst ? +m[1] : +m[3];
+      const month = dayFirst ? +m[3] : +m[1];
+      let year = +m[4];
       if (year < 100) year += year < 50 ? 2000 : 1900;
-      const d = new Date(Date.UTC(year, +m[1] - 1, +m[2]));
-      if (isNaN(d.getTime()) || d.getUTCMonth() !== +m[1] - 1) return null;
+      const d = new Date(Date.UTC(year, month - 1, day));
+      if (isNaN(d.getTime()) || d.getUTCMonth() !== month - 1) return null;
       d.setUTCDate(d.getUTCDate() + delta);
       const pad = (n) => String(n).padStart(2, "0");
-      return pad(d.getUTCMonth() + 1) + "/" + pad(d.getUTCDate()) + "/" +
-        (m[3].length === 2 ? String(d.getUTCFullYear()).slice(2) : d.getUTCFullYear());
+      const parts = dayFirst
+        ? [pad(d.getUTCDate()), pad(d.getUTCMonth() + 1)]
+        : [pad(d.getUTCMonth() + 1), pad(d.getUTCDate())];
+      return parts.join(m[2]) + m[2] +
+        (m[4].length === 2 ? String(d.getUTCFullYear()).slice(2) : d.getUTCFullYear());
     }
     if ((m = original.match(/^(\d{4})-(\d{2})-(\d{2})$/))) {
       const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
@@ -669,9 +726,12 @@ class PenNameGenerator {
       case "PERSON":
         // A lone name is most often a surname ("Mrs Smith"); a surname
         // stand-in reads naturally either way.
-        return original.split(NAME_SPLIT).length === 1
-          ? this._pick(PERSON_SURNAMES)
-          : this._personName();
+        if (original.split(NAME_SPLIT).length > 1) return this._personName();
+        // A known first name gets a first-name stand-in while the small
+        // pool lasts; anything else reads best as a surname.
+        return GAZ.firstNames.has(original.toLowerCase()) && attempt < 20
+          ? this._pick(FIRST_NAMES)
+          : this._pick(PERSON_SURNAMES);
       case "ORGANIZATION": {
         const suffix = original.match(
           /\b(Foundation|Trust|Fund|Charity|Charities|Association|Society|CIC|University|College|Hospital|Church|School|Academy|Council)\b/
@@ -692,7 +752,9 @@ class PenNameGenerator {
       case "UK_NINO": return this._reshapeAlnum(original);
       case "SORT_CODE":
       case "BANK_ACCOUNT": return this._reshapeDigits(original);
-      case "URL": return "https://www.example.org/" + this._pick(LAST_NAMES).toLowerCase();
+      case "URL":
+        return (original.startsWith("www.") ? "www.example.org/" : "https://www.example.org/") +
+          this._pick(LAST_NAMES).toLowerCase();
       case "US_SSN": return this._reshapeDigits(original);
       case "CREDIT_CARD": return this._reshapeDigits(original);
       case "IBAN_CODE": return this._reshapeAlnum(original);
@@ -740,7 +802,14 @@ function parseFullDate(s) {
   if ((m = s.match(/^([A-Za-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$/))) return ok(+m[3], MONTHS[m[1].toLowerCase()], +m[2]);
   if ((m = s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\.?,?\s+(\d{4})$/))) return ok(+m[3], MONTHS[m[2].toLowerCase()], +m[1]);
   if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/))) return ok(+m[1], +m[2], +m[3]);
-  if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/))) return ok(+m[3], +m[1], +m[2]);
+  if ((m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/))) return ok(+m[3], +m[2], +m[1]);
+  if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/))) {
+    // 05/01/2024 could be 5 January or May 1; only an unambiguous order
+    // is safe to re-word.
+    if (+m[1] > 12) return ok(+m[3], +m[2], +m[1]);
+    if (+m[2] > 12) return ok(+m[3], +m[1], +m[2]);
+    return null;
+  }
   return null;
 }
 
