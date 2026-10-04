@@ -3,7 +3,7 @@
  * app's own files so it keeps working with no connection at all. */
 "use strict";
 
-const CACHE = "penname-v5";
+const CACHE = "penname-v6";
 const ASSETS = [
   "./",
   "./index.html",

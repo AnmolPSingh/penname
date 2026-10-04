@@ -193,7 +193,7 @@ function renderReview() {
     const pen = document.createElement("input");
     pen.type = "text";
     pen.className = "pen-input";
-    pen.placeholder = "Stand-in (leave blank to auto-generate)";
+    pen.placeholder = "Your own stand-in (optional)";
     pen.value = span.pen || "";
     pen.setAttribute("aria-label", "Stand-in for " + span.text);
     pen.addEventListener("input", () => { span.pen = pen.value; });
@@ -607,5 +607,14 @@ function downloadBlob(blob, filename) {
 }
 
 /* ---------------- Init ---------------- */
+
+// The Mac app is sandboxed with no way to open a browser, so the
+// Philanthropel credits are shown as plain text there, not dead links.
+if (IS_MAC_APP) {
+  document.querySelectorAll('a[href^="https://philanthropel.com"]').forEach((a) => {
+    a.removeAttribute("href");
+    a.removeAttribute("target");
+  });
+}
 
 showTab("protect");
