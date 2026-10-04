@@ -26,3 +26,10 @@ macos/src-tauri/gen/
 *.xcarchive
 *.ipa
 .DS_Store
+
+# Signing material for the store builds — never commit
+*.provisionprofile
+*.mobileprovision
+entitlements-store.plist
+*.pkg
+*.p12

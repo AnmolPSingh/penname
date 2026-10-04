@@ -27,6 +27,10 @@ const TYPE_LABELS = {
   CUSTOM: "Custom",
 };
 
+/* The macOS app (Tauri) saves downloads straight to the Downloads folder. */
+const IS_MAC_APP = !!window.__TAURI_INTERNALS__;
+const SAVED_WHERE = IS_MAC_APP ? "Saved to Downloads ✓" : "Saved ✓";
+
 const MIN_PASSPHRASE = 8;
 const MAX_DOCUMENT_CHARS = 1000000; // ~1 MB of text; larger files stall a phone
 
@@ -325,7 +329,8 @@ $("btn-share-safe").addEventListener("click", async () => {
 
 $("btn-download-safe").addEventListener("click", async () => {
   try {
-    await saveFile(new Blob([state.safeText], { type: "text/plain" }), "penname-safe-copy.txt");
+    const outcome = await saveFile(new Blob([state.safeText], { type: "text/plain" }), "penname-safe-copy.txt");
+    if (outcome === "downloaded") flash($("btn-download-safe"), SAVED_WHERE);
   } catch (e) { showProtectError("Could not save the file: " + e.message); }
 });
 
@@ -366,7 +371,9 @@ $("btn-download-key").addEventListener("click", async () => {
     state.pendingKey = null;
     note.textContent = SHARE_FILES
       ? "✓ Key file handed over. If you chose “Save to Files”, it is on this device — keep it with your passphrase."
-      : "✓ Key file saved. Keep it somewhere safe on this device.";
+      : IS_MAC_APP
+        ? "✓ Key file saved to your Downloads folder. Keep it somewhere safe, with your passphrase."
+        : "✓ Key file saved. Keep it somewhere safe on this device.";
     note.classList.remove("hidden");
     await Activity.log("key-saved", {
       doc: state.docName,
@@ -484,7 +491,8 @@ $("btn-copy-restored").addEventListener("click", async () => {
 });
 $("btn-download-restored").addEventListener("click", async () => {
   try {
-    await saveFile(new Blob([state._restored || ""], { type: "text/plain" }), "penname-restored.txt");
+    const outcome = await saveFile(new Blob([state._restored || ""], { type: "text/plain" }), "penname-restored.txt");
+    if (outcome === "downloaded") flash($("btn-download-restored"), SAVED_WHERE);
   } catch (e) {
     const err = $("restore-error");
     err.textContent = "Could not save the file: " + e.message;
@@ -529,7 +537,8 @@ async function renderActivity() {
 $("btn-export-activity").addEventListener("click", async () => {
   const csv = await A.csv();
   try {
-    await saveFile(new Blob([csv], { type: "text/csv" }), "penname-activity.csv");
+    const outcome = await saveFile(new Blob([csv], { type: "text/csv" }), "penname-activity.csv");
+    if (outcome === "downloaded") flash($("btn-export-activity"), SAVED_WHERE);
   } catch (e) { alert("Could not save the file: " + e.message); }
 });
 
@@ -553,9 +562,15 @@ async function copyText(text, btn) {
     document.execCommand("copy");
     ta.remove();
   }
-  const old = btn.textContent;
-  btn.textContent = "Copied ✓";
-  setTimeout(() => (btn.textContent = old), 1400);
+  flash(btn, "Copied ✓");
+}
+
+/** Briefly replace a button's label to confirm an action. */
+function flash(btn, label) {
+  if (btn.dataset.label) return; // already flashing
+  btn.dataset.label = btn.textContent;
+  btn.textContent = label;
+  setTimeout(() => { btn.textContent = btn.dataset.label; delete btn.dataset.label; }, 1600);
 }
 
 /** Save a file the way the platform allows. Resolves to "shared",
