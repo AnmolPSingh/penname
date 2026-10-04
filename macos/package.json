@@ -1,0 +1,15 @@
+{
+  "name": "penname-macos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Penname for macOS — native shell (Tauri) around the Penname web app",
+  "scripts": {
+    "sync": "rm -rf webapp && mkdir -p webapp/icons && cp ../ios/index.html ../ios/style.css ../ios/app.js ../ios/gazetteer.js ../ios/engine.js ../ios/activity.js ../ios/manifest.webmanifest webapp/ && cp ../ios/icons/apple-touch-icon.png ../ios/icons/icon-192.png ../ios/icons/icon-512.png ../ios/icons/philanthropel-logo.png webapp/icons/ && cp -r ../ios/fonts webapp/fonts && echo 'webapp synced from ../ios'",
+    "icon": "tauri icon ../brand/penname-icon.png",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

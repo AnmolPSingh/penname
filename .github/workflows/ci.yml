@@ -55,3 +55,15 @@ jobs:
           else
             QT_QPA_PLATFORM=offscreen uv run pytest --cov=penname --cov-fail-under=80 -q
           fi
+
+  # The iOS/macOS apps run a JavaScript port of the engine (ios/engine.js).
+  # Its round-trip, detection and restore checks gate every commit too.
+  mobile-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Mobile engine tests
+        run: node ios/test_engine.js

@@ -18,3 +18,20 @@ gliner_model/
 
 # Internal agent build-instructions — kept local, not published
 CLAUDE.md
+
+# Native shells (iOS Capacitor, macOS Tauri): dependencies and build output
+node_modules/
+macos/src-tauri/target/
+macos/src-tauri/gen/
+*.xcarchive
+*.ipa
+.DS_Store
+
+# Signing material for the store builds — never commit
+*.provisionprofile
+*.mobileprovision
+entitlements-store.plist
+*.pkg
+*.p12
+ios-native/appstore/export/
+macos/appstore/export/

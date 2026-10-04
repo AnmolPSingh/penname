@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/cfg/2",
+  "productName": "Penname",
+  "version": "1.0.0",
+  "identifier": "com.philanthropel.penname",
+  "build": {
+    "frontendDist": "../webapp"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Penname",
+        "width": 1080,
+        "height": 780,
+        "minWidth": 460,
+        "minHeight": 560,
+        "backgroundColor": "#f7f5f1",
+        "acceptFirstMouse": true,
+        "label": "main",
+        "create": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "app",
+      "dmg"
+    ],
+    "icon": [
+      "icons/icon.icns",
+      "icons/32x32.png",
+      "icons/128x128.png"
+    ],
+    "category": "Productivity",
+    "shortDescription": "Private details get pen names.",
+    "longDescription": "Penname gives private details a pen name before you share a document with an AI assistant — and brings the real details back afterwards. Runs entirely on your device: no server, no analytics, no network.",
+    "macOS": {
+      "minimumSystemVersion": "12.0",
+      "signingIdentity": null,
+      "entitlements": "entitlements.plist"
+    },
+    "copyright": "© 2026 Philanthropel Limited"
+  }
+}

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Penname</title>
+  <meta name="description" content="Give private donor details a pen name before you share a document with AI — then bring the real details back. Runs entirely on your device.">
+
+  <!-- iOS standalone app -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Penname">
+  <meta name="theme-color" content="#f7f5f1">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Sidebar — iPad / MacBook navigation (hidden on phones) -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="icons/apple-touch-icon.png" alt="">
+      <span>Penname</span>
+    </div>
+    <nav aria-label="Main">
+      <button data-tab="protect" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 2.8v5.4c0 4.4-2.9 7.9-7 9.8-4.1-1.9-7-5.4-7-9.8V5.8L12 3z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
+        <span>Protect</span>
+      </button>
+      <button data-tab="restore">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 13.5L5 9l4.5-4.5"/><path d="M5 9h9.5a5.5 5.5 0 1 1 0 11H10"/></svg>
+        <span>Restore</span>
+      </button>
+      <button data-tab="activity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 8v4.5l3 1.8"/></svg>
+        <span>Activity</span>
+      </button>
+      <button data-tab="about">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.8" r="0.4" fill="currentColor"/></svg>
+        <span>About</span>
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <p>Nothing ever leaves<br>this device.</p>
+      <a class="sidebar-credit" href="https://philanthropel.com" target="_blank" rel="noopener noreferrer">
+        <span>A free tool from</span>
+        <img src="icons/philanthropel-logo.png" alt="Philanthropel">
+      </a>
+    </div>
+  </aside>
+
+  <div class="content">
+  <header class="header">
+    <h1>Penname</h1>
+    <p class="subtitle">Private details stay on this device.</p>
+  </header>
+
+  <!-- ============ PROTECT ============ -->
+  <main class="view active" id="view-protect">
+
+    <!-- Step 1: input -->
+    <section id="protect-step1">
+      <div class="card">
+        <span class="step-label">Step 1 · Open</span>
+        <h2>Paste your document</h2>
+        <p class="hint">A donor letter, notes, a report — anything you'd like to share with an AI assistant. Or open a text, Markdown or CSV file.</p>
+        <textarea id="input-text" placeholder="Paste the document here…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-choose-file">Choose a file</button>
+        </div>
+        <input type="file" id="file-input" class="hidden" accept=".txt,.md,.csv,text/plain,text/markdown,text/csv">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-detect">Find private details</button>
+        </div>
+      </div>
+      <div class="card">
+        <p class="hint" style="margin-bottom:0">
+          <strong>Nothing leaves this device.</strong> Detection, replacement and the key file all
+          happen here. The only thing you ever share is the safe copy — and only when you paste it yourself.
+        </p>
+      </div>
+      <a class="philanthropel-row made-by" href="https://philanthropel.com" target="_blank" rel="noopener noreferrer">
+        <span class="made-by-label">A free tool from</span>
+        <img src="icons/philanthropel-logo.png" alt="Philanthropel">
+        <span class="philanthropel-url">philanthropel.com</span>
+      </a>
+      <div class="error-note hidden" id="protect-error" role="alert"></div>
+    </section>
+
+    <!-- Step 2: review -->
+    <section id="protect-step2" class="hidden">
+      <div class="card">
+        <span class="step-label">Step 2 · Check the list</span>
+        <h2>Review every stand-in</h2>
+        <p class="hint">Untick anything that should keep its real value. Tap a stand-in to type your own.</p>
+        <p class="count-line" id="review-count"></p>
+        <div class="toolbar">
+          <input type="search" id="review-search" placeholder="Search the list…" aria-label="Search findings">
+          <button class="btn btn-small" id="btn-tick-shown">Tick shown</button>
+          <button class="btn btn-small" id="btn-untick-shown">Untick shown</button>
+        </div>
+        <div id="review-list"></div>
+        <hr class="divider">
+        <p class="field-label">Penname missed something? Add it here.</p>
+        <input type="text" id="add-value-input" placeholder="Exact text to replace, e.g. 340 families" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-add-value">Add to list</button>
+        </div>
+      </div>
+      <div class="stack">
+        <button class="btn btn-primary" id="btn-export">Create the safe copy</button>
+        <button class="btn btn-secondary" id="btn-back-input">Back</button>
+      </div>
+      <div class="error-note hidden" id="protect-error-2" role="alert"></div>
+    </section>
+
+    <!-- Step 3: export -->
+    <section id="protect-step3" class="hidden">
+      <div class="card">
+        <span class="step-label">Step 3 · Save & share</span>
+        <h2>Your safe copy</h2>
+        <p class="hint" id="export-summary"></p>
+        <div class="output" id="safe-output"></div>
+        <div class="btn-row">
+          <button class="btn btn-teal" id="btn-copy-safe">Copy safe copy</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-share-safe">Share…</button>
+          <button class="btn btn-secondary" id="btn-download-safe">Save file</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>The key file</h2>
+        <p class="hint">The key file (.pnmap) is what puts the real details back in Step 4. It is encrypted with your passphrase and stays on this device. Keep it — and remember the passphrase.</p>
+        <p class="field-label">Choose a passphrase for the key file</p>
+        <input type="password" id="passphrase" placeholder="Passphrase (at least 8 characters)" autocomplete="new-password" minlength="8">
+        <p class="field-label">Type it again</p>
+        <input type="password" id="passphrase-confirm" placeholder="Same passphrase again" autocomplete="new-password">
+        <p class="hint" style="margin-top:8px">There is no way to recover a forgotten passphrase.</p>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-download-key">Save key file (.pnmap)</button>
+        </div>
+        <p class="success-note hidden" id="key-note" style="margin-top:12px" role="status"></p>
+      </div>
+      <div class="stack">
+        <button class="btn btn-primary" id="btn-start-over">Start over</button>
+      </div>
+      <div class="error-note hidden" id="protect-error-3" role="alert"></div>
+    </section>
+  </main>
+
+  <!-- ============ RESTORE ============ -->
+  <main class="view" id="view-restore">
+    <div class="card">
+      <span class="step-label">Step 4 · Bring the details back</span>
+      <h2>Take pen names off</h2>
+      <p class="hint">Paste your assistant's reply, choose the key file you saved in Step 3, and the real details return. This happens on this device — the restored text is never shared.</p>
+
+      <p class="field-label">Your assistant's reply</p>
+      <textarea id="restore-input" class="small" placeholder="Paste the reply here…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+
+      <p class="field-label">Key file</p>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn btn-secondary" id="btn-choose-key">Choose .pnmap file</button>
+      </div>
+      <!-- iOS decides whether to offer the camera and photo library from the
+           MIME types: with none (or only an extension) it offers both. A
+           non-media MIME type sends the picker straight to Files. .pnmap is
+           also registered as a file type in the iOS app's Info.plist. -->
+      <input type="file" id="key-input" class="hidden" accept=".pnmap,application/octet-stream">
+      <p class="count-line" id="key-file-name" style="margin-top:8px">No key file chosen.</p>
+
+      <p class="field-label">Passphrase</p>
+      <input type="password" id="restore-passphrase" placeholder="The passphrase you chose" autocomplete="off">
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-restore">Bring the real details back</button>
+      </div>
+      <div class="error-note hidden" id="restore-error" role="alert"></div>
+      <p class="success-note hidden" id="restore-match"></p>
+    </div>
+
+    <div class="card hidden" id="restore-actions">
+      <h2>Restored</h2>
+      <p class="restore-report" id="restore-summary" role="status"></p>
+      <p class="restore-report warn hidden" id="restore-warning" role="alert"></p>
+      <div class="output" id="restore-output"></div>
+      <div class="btn-row">
+        <button class="btn btn-teal" id="btn-copy-restored">Copy restored text</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-download-restored">Save file</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ ACTIVITY ============ -->
+  <main class="view" id="view-activity">
+    <div class="card">
+      <span class="step-label">History</span>
+      <h2>Activity</h2>
+      <p class="hint">A private record of what you've protected and restored — <strong>metadata only</strong> (document name, date, how many details were replaced). Never the values themselves. Encrypted on this device, and yours to erase at any time.</p>
+      <div id="activity-list"><p class="count-line">Loading…</p></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-export-activity">Export CSV</button>
+        <button class="btn btn-danger-text btn-secondary" id="btn-clear-activity">Clear all</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ ABOUT ============ -->
+  <main class="view about" id="view-about">
+    <div class="card">
+      <div class="brand-row">
+        <img src="icons/apple-touch-icon.png" alt="">
+        <div>
+          <div class="name">Penname</div>
+          <div class="tag">A free tool for nonprofits</div>
+        </div>
+      </div>
+      <a class="philanthropel-row" href="https://philanthropel.com" target="_blank" rel="noopener noreferrer">
+        <img src="icons/philanthropel-logo.png" alt="Philanthropel">
+        <span class="philanthropel-url">philanthropel.com</span>
+      </a>
+    </div>
+
+    <!-- How it works: the dashed frames are this device; the dark panel is
+         the only thing outside it. The picture is the explanation, so the
+         whole figure carries one text alternative. -->
+    <section class="card" aria-labelledby="how-heading">
+      <span class="step-label">How it works</span>
+      <h2 id="how-heading">Real details never leave this device</h2>
+      <figure class="flow" role="img" aria-label="How Penname works. One: your document, with real details, stays on this device. Two: Penname swaps each detail for a stand-in and saves an encrypted key file on this device. Three: only the safe copy, with stand-ins, goes to your AI assistant. Four: back on this device, the key file puts the real details into the assistant's reply.">
+        <div class="flow-zone flow-device">
+          <span class="flow-zone-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>
+            On this device
+          </span>
+          <div class="flow-step">
+            <span class="flow-num">1</span>
+            <div class="flow-body">
+              <div class="flow-title">Your document</div>
+              <div class="flow-sample"><span class="tok real">Margaret Wilson</span><span class="tok real">£2,500</span></div>
+            </div>
+          </div>
+          <div class="flow-step">
+            <span class="flow-num">2</span>
+            <div class="flow-body">
+              <div class="flow-title">Stand-ins go in</div>
+              <div class="flow-swap">
+                <span class="tok real struck">Margaret Wilson</span>
+                <span class="flow-to">
+                  <svg class="flow-arrow-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13.5 6.5L19 12l-5.5 5.5"/></svg>
+                  <span class="tok pen">Nora Lockwood</span>
+                </span>
+              </div>
+              <div class="flow-key">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+                Key file, locked with your passphrase
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v15"/><path d="M6.5 13.5L12 19l5.5-5.5"/></svg>
+          Only the safe copy goes out
+        </div>
+
+        <div class="flow-zone flow-outside">
+          <span class="flow-zone-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5a4.5 4.5 0 0 1-.6-8.96 6 6 0 0 1 11.7 1.5A3.75 3.75 0 0 1 17.5 18.5H7z"/></svg>
+            Your AI assistant
+          </span>
+          <div class="flow-step">
+            <span class="flow-num">3</span>
+            <div class="flow-body">
+              <div class="flow-title">It only ever sees stand-ins</div>
+              <div class="flow-sample"><span class="tok pen">Nora Lockwood</span><span class="tok pen">£4,137</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v15"/><path d="M6.5 13.5L12 19l5.5-5.5"/></svg>
+          Its reply comes back
+        </div>
+
+        <div class="flow-zone flow-device">
+          <span class="flow-zone-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>
+            On this device
+          </span>
+          <div class="flow-step">
+            <span class="flow-num">4</span>
+            <div class="flow-body">
+              <div class="flow-title">The key file brings them back</div>
+              <div class="flow-sample"><span class="tok restored">Margaret Wilson</span><span class="tok restored">£2,500</span></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </section>
+
+    <section class="card" aria-labelledby="know-heading">
+      <span class="step-label">Good to know</span>
+      <h2 id="know-heading" class="visually-hidden">Good to know</h2>
+      <ul class="facts">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 2.8v5.4c0 4.4-2.9 7.9-7 9.8-4.1-1.9-7-5.4-7-9.8V5.8L12 3z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
+          <div><strong>Private by design</strong><span>No server, no analytics, no network calls.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+          <div><strong>Always read the safe copy</strong><span>No tool finds everything. Add anything Penname missed.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16"/><path d="M5 7h14"/><path d="M5 7l-2.5 6a2.7 2.7 0 0 0 5 0L5 7z"/><path d="M19 7l-2.5 6a2.7 2.7 0 0 0 5 0L19 7z"/><path d="M8.5 20h7"/></svg>
+          <div><strong>A safeguard, not compliance</strong><span>The safe copy still counts as personal data. This is not legal advice.</span></div>
+        </li>
+      </ul>
+      <p class="about-fineprint">Version 1.0.0 · Engine ported from Penname 2.0.3 · Apache-2.0 code ·
+      “Penname” and “Philanthropel” are trademarks of Philanthropel Limited · © 2026 Philanthropel Limited</p>
+    </section>
+  </main>
+
+  <!-- ============ TAB BAR — phones only ============ -->
+  <nav class="tabbar" aria-label="Main">
+    <button data-tab="protect" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 2.8v5.4c0 4.4-2.9 7.9-7 9.8-4.1-1.9-7-5.4-7-9.8V5.8L12 3z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
+      <span>Protect</span>
+    </button>
+    <button data-tab="restore">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 13.5L5 9l4.5-4.5"/><path d="M5 9h9.5a5.5 5.5 0 1 1 0 11H10"/></svg>
+      <span>Restore</span>
+    </button>
+    <button data-tab="activity">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 8v4.5l3 1.8"/></svg>
+      <span>Activity</span>
+    </button>
+    <button data-tab="about">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.8" r="0.4" fill="currentColor"/></svg>
+      <span>About</span>
+    </button>
+  </nav>
+  </div><!-- /.content -->
+</div>
+
+<script src="gazetteer.js"></script>
+<script src="engine.js"></script>
+<script src="activity.js"></script>
+<script src="app.js"></script>
+<script>
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    window.addEventListener("load", () => {
+      // In bundled shells (WKWebView custom schemes) service workers are
+      // unavailable; the app is fully offline there anyway, so failure is
+      // expected and harmless.
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+  // Startup self-test: the app's guarantees depend on WebCrypto, IndexedDB
+  // and the engine round-trip. If any of them is unavailable (e.g. a shell
+  // that breaks secure context), surface it in the window title so it is
+  // impossible to miss.
+  window.addEventListener("load", () => {
+    (async () => {
+      try {
+        if (!window.crypto || !window.crypto.subtle) throw new Error("WebCrypto unavailable");
+        const k = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, k, new TextEncoder().encode("ping"));
+        await crypto.subtle.decrypt({ name: "AES-GCM", iv }, k, ct);
+        const db = await new Promise((res, rej) => {
+          const q = indexedDB.open("pn-selftest", 1);
+          q.onupgradeneeded = () => q.result.createObjectStore("s");
+          q.onsuccess = () => res(q.result);
+          q.onerror = () => rej(q.error);
+        });
+        db.close();
+        if (window.PennameEngine) {
+          const sample = "Dear Jane Smith, gift of $1,000.";
+          const s = new window.PennameEngine.PennameSession();
+          const r = s.pseudonymize(sample);
+          if (s.reverse(r.text, r.entries) !== sample) throw new Error("engine round-trip failed");
+        }
+      } catch (e) {
+        document.title = "Penname — ⚠ " + (e.message || "self-test failed");
+      }
+    })();
+  });
+</script>
+</body>
+</html>
