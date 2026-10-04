@@ -34,3 +34,4 @@ entitlements-store.plist
 *.pkg
 *.p12
 ios-native/appstore/export/
+macos/appstore/export/

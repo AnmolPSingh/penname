@@ -22,54 +22,34 @@ Not yet verified — needs a person at the keyboard or a real signature:
   Keychain. Re-signed test builds trigger a Keychain prompt; a build with
   one stable signature should not. Check this on the first signed build.
 - Mac screenshots.
+- App Review. Version 1.0.0 was uploaded and passed Apple's upload checks;
+  it has not been reviewed.
 
 ## What you need (one-time)
 
-1. Apple Developer Program membership (the same one covers iOS).
-2. In Xcode ▸ Settings ▸ Accounts ▸ Manage Certificates, create:
-   - **Apple Distribution** (signs the app)
-   - **Mac Installer Distribution** (signs the .pkg)
-3. At developer.apple.com ▸ Identifiers: App ID `com.philanthropel.penname`
-   with the macOS platform ticked. Using the same ID as the iOS app makes
-   them one listing with one purchase.
-4. At developer.apple.com ▸ Profiles: a **Mac App Store** provisioning
-   profile for that App ID. Save it as
-   `macos/src-tauri/embedded.provisionprofile` (do not commit it).
-5. In App Store Connect: add the macOS platform to the Penname app record.
+1. The Philanthropel Limited team in Xcode ▸ Settings ▸ Accounts (Admin role).
+2. In App Store Connect: the macOS platform on the Penname app record.
+
+No certificates or profiles need creating by hand. Xcode registers the app
+ID and uses cloud-managed certificates on first export.
 
 ## Build, sign, package, upload
 
-Replace `TEAMID` and the certificate names with yours.
-
 ```bash
 cd macos
-npm run sync          # copy the web app from ../ios
-npx tauri build --bundles app
+./appstore/build-store.sh            # signed Penname.pkg in appstore/export/
+./appstore/build-store.sh --upload   # also uploads to App Store Connect
 ```
 
-Add your team to a copy of the entitlements (the two extra keys must match
-the provisioning profile):
+The script builds the app, wraps it in an Xcode archive and lets
+`xcodebuild -exportArchive` sign it: the app with "Apple Distribution", the
+installer with "3rd Party Mac Developer Installer", with a Mac App Store
+profile embedded. Each upload needs a new build number: set
+`bundle.macOS.bundleVersion` in `src-tauri/tauri.conf.json` (or raise the
+version) before uploading again.
 
-```xml
-<key>com.apple.application-identifier</key>
-<string>TEAMID.com.philanthropel.penname</string>
-<key>com.apple.developer.team-identifier</key>
-<string>TEAMID</string>
-```
-
-```bash
-APP=src-tauri/target/release/bundle/macos/Penname.app
-cp src-tauri/embedded.provisionprofile "$APP/Contents/embedded.provisionprofile"
-codesign --force --deep --options runtime \
-  --sign "Apple Distribution: Philanthropel Limited (TEAMID)" \
-  --entitlements src-tauri/entitlements-store.plist "$APP"
-productbuild --component "$APP" /Applications \
-  --sign "3rd Party Mac Developer Installer: Philanthropel Limited (TEAMID)" \
-  Penname.pkg
-```
-
-Upload `Penname.pkg` with the **Transporter** app (free on the Mac App
-Store), then pick the build in App Store Connect and submit for review.
+The export prints a warning that no dSYM was found. That only affects how
+readable crash reports are.
 
 ## Things a reviewer may ask about
 
