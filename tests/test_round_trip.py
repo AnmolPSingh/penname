@@ -113,3 +113,39 @@ def test_round_trip_preserves_line_endings(newline: str, tmp_path: Path) -> None
     dest = tmp_path / "restored.txt"
     write_document(dest, reverse_text(result.text, result.mapping))
     assert dest.read_bytes() == source.read_bytes()
+
+
+def test_date_shift_landing_on_another_date_in_the_document_still_generates() -> None:
+    """Regression: two dates exactly one shift apart used to fail 1 run in ~740.
+
+    The session shift is fixed, so retrying produced the same colliding date
+    fifty times and gave up. The generator must nudge the date instead.
+    """
+    from datetime import timedelta
+
+    from penname.core.replace.generator import PenNameGenerator
+
+    text = "Received on March 14, 2025. Reception on April 22, 2025."
+    generator = PenNameGenerator(seed=1)
+    generator._date_delta = timedelta(days=-39)  # April 22 -> March 14
+
+    pen = generator.pen_name_for("DATE_TIME", "April 22, 2025", text)
+
+    assert pen != "April 22, 2025"
+    assert pen not in text
+
+
+def test_many_dates_in_one_document_never_exhaust_the_generator() -> None:
+    """A year of daily dates collides with any shift; every one still gets a pen name."""
+    from datetime import date, timedelta
+
+    from penname.core.replace.generator import PenNameGenerator
+
+    dates = [(date(2024, 1, 1) + timedelta(days=i)).isoformat() for i in range(366)]
+    text = "\n".join(dates)
+    generator = PenNameGenerator(seed=2)
+
+    pens = [generator.pen_name_for("DATE_TIME", d, text) for d in dates]
+
+    assert len(set(pens)) == len(dates)
+    assert all(p not in text for p in pens)

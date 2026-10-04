@@ -53,6 +53,9 @@ const MONTHS = {
   november: 11, nov: 11, december: 12, dec: 12,
 };
 
+const FULL_MONTHS = ["january", "february", "march", "april", "may", "june", "july",
+  "august", "september", "october", "november", "december"];
+
 function luhnValid(digits) {
   let sum = 0;
   let alt = false;
@@ -74,6 +77,55 @@ function phoneValid(raw) {
   // Reject values that are just a run of identical digits (placeholders).
   if (/^(\d)\1+$/.test(digits)) return false;
   return true;
+}
+
+/** A grouped phone pattern can run on into a following number
+ *  ("+44 20 7946 0958 2024"). Drop trailing groups until the digit count is
+ *  a plausible phone; null if it never is. */
+function trimPhone(raw, minDigits, maxDigits) {
+  let candidate = raw;
+  for (;;) {
+    const digits = candidate.replace(/\D/g, "");
+    if (digits.length < minDigits || /^(\d)\1+$/.test(digits)) return null;
+    if (digits.length <= maxDigits) return candidate;
+    const cut = candidate.search(/[ \t.-]\d+$/);
+    if (cut < 0) return null;
+    candidate = candidate.slice(0, cut);
+  }
+}
+
+/** "Mrs Wilson Dear Jane": the title pattern takes up to three words, so it
+ *  can run on past the name. Keep the title and the name words up to the
+ *  first non-name word; the rest is rescanned. */
+function trimTitledName(raw) {
+  const wordRe = /\S+/g;
+  wordRe.exec(raw); // the title
+  let end = -1;
+  let w;
+  while ((w = wordRe.exec(raw)) !== null) {
+    if (!personLooksReal(w[0])) break;
+    end = w.index + w[0].length;
+  }
+  return end < 0 ? null : raw.slice(0, end);
+}
+
+/** Name spans separated only by spaces are one name. Left separate, their
+ *  stand-ins sit side by side and can recreate another name's stand-in,
+ *  which would then restore to the wrong value. */
+function mergeAdjacentPersons(text, spans) {
+  const merged = [];
+  for (const span of spans.slice().sort((a, b) => a.start - b.start)) {
+    const prev = merged[merged.length - 1];
+    if (prev && prev.entity_type === "PERSON" && span.entity_type === "PERSON" &&
+        /^[ \t\u00A0]+$/.test(text.slice(prev.end, span.start))) {
+      merged[merged.length - 1] = {
+        ...prev, end: span.end, text: text.slice(prev.start, span.end), score: Math.max(prev.score, span.score),
+      };
+    } else {
+      merged.push(span);
+    }
+  }
+  return merged;
 }
 
 /* Words that appear capitalised in running text but are not names. */
@@ -148,14 +200,14 @@ const DETECTORS = [
   { type: "URL", score: 0.85,
     re: /https?:\/\/[^\s<>"')\]]+/g },
   { type: "CREDIT_CARD", score: 0.9,
-    re: /\b(?:\d[ -]?){13,19}\b/g,
+    re: /\b\d(?:[ -]?\d){12,18}\b/g,
     validate: (m) => luhnValid(m.replace(/[ -]/g, "")) },
   { type: "IBAN_CODE", score: 0.85,
     re: /\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,6}(?:[ ]?[A-Z0-9]{2})?\b/g },
   { type: "US_SSN", score: 0.9,
     re: /\b\d{3}-\d{2}-\d{4}\b/g },
   { type: "DONATION_AMOUNT", score: 0.85,
-    re: /[$£€]\s?\d[\d,]*(?:\.\d{1,2}(?!\d))?(?:\s?(?:K|M|million|billion|bn)\b)?/g },
+    re: /[$£€]\s?(?:\d{1,3}(?:,\d{3})+(?!\d)|\d+)(?:\.\d{1,2}(?!\d))?(?:\s?(?:K|M|million|billion|bn)\b)?/g },
   { type: "DATE_TIME", score: 0.8,
     re: /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4}\b/gi },
   { type: "DATE_TIME", score: 0.8,
@@ -169,6 +221,14 @@ const DETECTORS = [
   { type: "PHONE_NUMBER", score: 0.7,
     re: /(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)[\s.-]?)?\d{3}[\s.-]?\d{3,4}(?:[\s.-]?\d{2,4})?/g,
     validate: phoneValid },
+  // International, grouped: +44 20 7946 0958, +44 (0)20 7946 0958, +33 1 42 68 53 00
+  { type: "PHONE_NUMBER", score: 0.75,
+    re: /\+\d{1,3}(?:[ \t.-]?\(0\))?(?:[ \t.-]?\d{1,5}){2,6}(?!\d)/g,
+    trim: (m) => trimPhone(m, 9, 15) },
+  // National with a leading 0: 01632 960123, 07700 900123, 020 7946 0958
+  { type: "PHONE_NUMBER", score: 0.7,
+    re: /\b0\d{2,4}[ \t.-]\d{3,4}(?:[ \t.-]?\d{3,4})?(?!\d)/g,
+    trim: (m) => trimPhone(m, 10, 11) },
   { type: "PHONE_NUMBER", score: 0.7,
     re: /(?:\+\d{10,14}|\b0\d{9,10})\b/g,
     validate: (m) => !/^(\d)\1+$/.test(m.replace(/\D/g, "")) },
@@ -185,7 +245,8 @@ const DETECTORS = [
   { type: "ORGANIZATION", score: 0.8,
     re: /\b[A-Z][A-Za-z&.'-]*(?:\s+(?:of|for|the|and|[A-Z][A-Za-z&.'-]+)){0,3}\s+(?:Foundation|Trust|Fund|Charity|Charities|Association|Society|CIC|Limited|Ltd\.?|LLC|Inc\.?|University|College|Hospital|Church|School|Academy|Council)\b/g },
   { type: "PERSON", score: 0.85,
-    re: nameRe(`${TITLES}\\.?${NAME_SEP}${NAME_WORD}(?:${NAME_SEP}${NAME_WORD}){0,2}`), group: 1 },
+    re: nameRe(`${TITLES}\\.?${NAME_SEP}${NAME_WORD}(?:${NAME_SEP}${NAME_WORD}){0,2}`), group: 1,
+    trim: trimTitledName },
   { type: "PERSON", score: 0.55,
     re: new RegExp(`\\bDear${NAME_SEP}(${NAME_WORD}(?:${NAME_SEP}${NAME_WORD}){0,2}),`, "gu"), group: 1 },
   { type: "PERSON", score: 0.5,
@@ -267,8 +328,18 @@ function namePartSpans(text, spans) {
   let m;
   while ((m = tokenRe.exec(text)) !== null) {
     const token = m[0].replace(/['’]s$/u, "");
-    if (parts.has(token)) {
-      found.push({ start: m.index, end: m.index + token.length, entity_type: "PERSON", score: 0.3, text: token });
+    const start = m.index;
+    const end = start + token.length;
+    if (!parts.has(token) || spans.some((s) => start < s.end && end > s.start)) continue;
+    // Parts side by side ("Jane Smith" after "Jane Smith Margaret") are one
+    // name. Kept separate, their stand-ins would sit together and recreate
+    // the full name's stand-in, which restores to the wrong value.
+    const prev = found[found.length - 1];
+    if (prev && /^[ \t ]+$/.test(text.slice(prev.end, start))) {
+      prev.end = end;
+      prev.text = text.slice(prev.start, end);
+    } else {
+      found.push({ start, end, entity_type: "PERSON", score: 0.3, text: token });
     }
   }
   return found;
@@ -281,9 +352,16 @@ function detectSpans(text) {
     let m;
     while ((m = det.re.exec(text)) !== null) {
       if (m.index === det.re.lastIndex) det.re.lastIndex++; // zero-width safety
-      const raw = m[det.group || 0];
+      let raw = m[det.group || 0];
       if (!raw || !raw.trim()) continue;
       const idx = det.group ? m.index + m[0].lastIndexOf(raw) : m.index;
+      if (det.trim) {
+        const trimmed = det.trim(raw);
+        if (!trimmed) continue;
+        // Rescan whatever was cut off: it may be a detail of its own.
+        if (trimmed.length < raw.length) det.re.lastIndex = idx + trimmed.length;
+        raw = trimmed;
+      }
       if (det.validate && !det.validate(raw)) {
         const rescued = det.rescue ? rescueName(det, raw, idx, text) : null;
         if (rescued) spans.push(rescued);
@@ -354,6 +432,24 @@ function makeRng(seed) {
 
 class PenNameError extends Error {}
 
+/** A number continues if a digit follows, or a thousands group ("1" in
+ *  "1,250"), or decimals ("1" in "1.50") — the same shapes the amount
+ *  detector reads as one number. "31,2024-01-05" is a new CSV column. */
+const numberContinues = (text, at) =>
+  /^(?:\d|,\d{3}(?!\d)|\.\d{1,2}(?!\d))/.test(text.slice(at, at + 5));
+
+/** True if `amount` occurs in `text` as a whole number, not as the start or
+ *  end of a longer one. */
+function containsWholeNumber(text, amount) {
+  let at = text.indexOf(amount);
+  while (at !== -1) {
+    const before = text[at - 1];
+    if (!(before >= "0" && before <= "9") && !numberContinues(text, at + amount.length)) return true;
+    at = text.indexOf(amount, at + 1);
+  }
+  return false;
+}
+
 class PenNameGenerator {
   constructor(seed) {
     this.rng = makeRng(seed);
@@ -362,6 +458,7 @@ class PenNameGenerator {
     this.pinned = new Set();
     const sign = this.rng() < 0.5 ? -1 : 1;
     this.dateDelta = sign * Math.floor(30 + this.rng() * 371); // days
+    this.dateBump = 0; // extra years, raised when a document's dates clash
   }
 
   penNameFor(entityType, original, avoidText) {
@@ -369,9 +466,13 @@ class PenNameGenerator {
     const cached = this.cache.get(key);
     if (cached !== undefined) return cached;
     const accept = (candidate) => {
-      if (!candidate || candidate === original || this.used.has(candidate) || avoidText.includes(candidate)) {
-        return false;
-      }
+      if (!candidate || candidate === original || this.used.has(candidate)) return false;
+      // An amount only clashes with the same whole number: "£31" inside
+      // "£3,125" is a different amount, and restore treats it as one.
+      const clash = entityType === "DONATION_AMOUNT"
+        ? containsWholeNumber(avoidText, candidate)
+        : avoidText.includes(candidate);
+      if (clash) return false;
       // Restore also matches a stand-in's first name or surname alone, so
       // neither may already occur in the document.
       if (entityType === "PERSON" && candidate.split(NAME_SPLIT).some((w) => w.length > 2 && avoidText.includes(w))) {
@@ -388,7 +489,7 @@ class PenNameGenerator {
       if (derived && accept(derived)) return derived;
     }
     for (let i = 0; i < 50; i++) {
-      const candidate = this._generate(entityType, original);
+      const candidate = this._generate(entityType, original, i);
       if (accept(candidate)) return candidate;
     }
     // Last resort for very large lists: a middle initial multiplies the pool.
@@ -464,14 +565,16 @@ class PenNameGenerator {
     });
   }
 
-  _reshapeAmount(original) {
+  _reshapeAmount(original, attempt = 0) {
     const m = original.match(/\d[\d,]*(?:\.\d+)?/);
     if (!m) return this._reshapeDigits(original);
     const raw = m[0];
     const hasGrouping = raw.includes(",");
     const hasCents = raw.includes(".");
     const value = parseFloat(raw.replace(/,/g, ""));
-    const factor = this._int(60, 175) / 100; // 0.60x .. 1.75x
+    // 0.60x .. 1.75x; widened on later attempts so documents dense with
+    // amounts still find a free stand-in.
+    const factor = attempt < 20 ? this._int(60, 175) / 100 : this._int(30, 400) / 100;
     let newValue = Math.max(1, Math.round(value * factor));
     // Avoid round stand-ins: an AI writes round figures of its own, and a
     // coincidence would be "restored" into the wrong amount.
@@ -487,7 +590,11 @@ class PenNameGenerator {
     return original.slice(0, m.index) + rendered + original.slice(m.index + raw.length);
   }
 
-  _shiftDate(original) {
+  _shiftDate(original, attempt = 0) {
+    // The session shift is fixed, so a retry would reproduce the same date.
+    // When that date is unusable (already in the document, or another date's
+    // stand-in), each retry pushes this one date a further year along.
+    const delta = this.dateDelta + Math.sign(this.dateDelta) * 366 * (attempt + this.dateBump);
     // Supported shapes (mirrors the desktop formats):
     //   January 5, 2024 | Jan 5, 2024 | 5 January 2024 | 5th January 2024
     //   01/05/2024 | 1/5/24 | 2024-01-05 | January 2024 | 2024
@@ -495,19 +602,19 @@ class PenNameGenerator {
     if ((m = original.match(/^([A-Za-z]+)\.?\s+(\d{1,2})(st|nd|rd|th)?,\s*(\d{4})$/))) {
       const mo = MONTHS[m[1].toLowerCase()];
       if (!mo) return null;
-      return this._render(m[1], +m[2], m[3] || "", +m[4], original, "us");
+      return this._render(m[1], +m[2], m[3] || "", +m[4], original, "us", delta);
     }
     if ((m = original.match(/^(\d{1,2})(st|nd|rd|th)?\s+([A-Za-z]+)\.?\s+(\d{4})$/))) {
       const mo = MONTHS[m[3].toLowerCase()];
       if (!mo) return null;
-      return this._render(m[3], +m[1], m[2] || "", +m[4], original, "uk");
+      return this._render(m[3], +m[1], m[2] || "", +m[4], original, "uk", delta);
     }
     if ((m = original.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/))) {
       let year = +m[3];
       if (year < 100) year += year < 50 ? 2000 : 1900;
       const d = new Date(Date.UTC(year, +m[1] - 1, +m[2]));
       if (isNaN(d.getTime()) || d.getUTCMonth() !== +m[1] - 1) return null;
-      d.setUTCDate(d.getUTCDate() + this.dateDelta);
+      d.setUTCDate(d.getUTCDate() + delta);
       const pad = (n) => String(n).padStart(2, "0");
       return pad(d.getUTCMonth() + 1) + "/" + pad(d.getUTCDate()) + "/" +
         (m[3].length === 2 ? String(d.getUTCFullYear()).slice(2) : d.getUTCFullYear());
@@ -515,7 +622,7 @@ class PenNameGenerator {
     if ((m = original.match(/^(\d{4})-(\d{2})-(\d{2})$/))) {
       const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
       if (isNaN(d.getTime())) return null;
-      d.setUTCDate(d.getUTCDate() + this.dateDelta);
+      d.setUTCDate(d.getUTCDate() + delta);
       const pad = (n) => String(n).padStart(2, "0");
       return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate());
     }
@@ -523,12 +630,13 @@ class PenNameGenerator {
       const mo = MONTHS[m[1].toLowerCase()];
       if (!mo) return null;
       // Shift by whole months (|dateDelta| >= 30 days, so at least one).
-      const months = Math.sign(this.dateDelta) * Math.max(1, Math.round(Math.abs(this.dateDelta) / 30.44));
+      const months = Math.sign(delta) * Math.max(1, Math.round(Math.abs(delta) / 30.44));
       const total = +m[2] * 12 + (mo - 1) + months;
       return this._monthName(m[1], (total % 12) + 1) + " " + Math.floor(total / 12);
     }
     if ((m = original.match(/^\d{4}$/))) {
-      return String(+original + (Math.abs(this.dateDelta) > 300 ? Math.sign(this.dateDelta) : 1));
+      return String(+original + (Math.abs(this.dateDelta) > 300 ? Math.sign(this.dateDelta) : 1) +
+        Math.sign(this.dateDelta) * (attempt + this.dateBump));
     }
     return null;
   }
@@ -537,16 +645,16 @@ class PenNameGenerator {
     // Keep the abbreviation style of the original (Jan vs January).
     const full = ["January","February","March","April","May","June","July",
       "August","September","October","November","December"][num - 1];
-    // A spelled-out original ("June") stays spelled out; "Jun"/"Sept" abbreviate.
-    const isFull = spelled.length > 3 && full.toLowerCase().startsWith(spelled.toLowerCase()) &&
-      spelled.length === full.length;
-    return isFull ? full : full.slice(0, 3);
+    // Keep the original's style: a spelled-out month ("April", "May") stays
+    // spelled out, an abbreviation ("Apr", "Sept") stays abbreviated.
+    const wasFull = FULL_MONTHS.includes(spelled.toLowerCase());
+    return wasFull ? full : full.slice(0, 3);
   }
 
-  _render(monthSpelled, day, suffix, year, original, style) {
+  _render(monthSpelled, day, suffix, year, original, style, delta) {
     const d = new Date(Date.UTC(year, MONTHS[monthSpelled.toLowerCase()] - 1, day));
     if (isNaN(d.getTime())) return null;
-    d.setUTCDate(d.getUTCDate() + this.dateDelta);
+    d.setUTCDate(d.getUTCDate() + delta);
     const num = d.getUTCDate();
     const mo = this._monthName(monthSpelled, d.getUTCMonth() + 1);
     const y = d.getUTCFullYear();
@@ -556,7 +664,7 @@ class PenNameGenerator {
     return dayStr + suffix + " " + mo + " " + y;
   }
 
-  _generate(entityType, original) {
+  _generate(entityType, original, attempt = 0) {
     switch (entityType) {
       case "PERSON":
         // A lone name is most often a surname ("Mrs Smith"); a surname
@@ -577,7 +685,7 @@ class PenNameGenerator {
       }
       case "PHONE_NUMBER": return this._reshapeDigits(original);
       case "DATE_TIME": {
-        const shifted = this._shiftDate(original);
+        const shifted = this._shiftDate(original, attempt);
         return shifted !== null ? shifted : this._personName() && "March " + this._int(1, 28) + ", " + this._int(2020, 2026);
       }
       case "LOCATION": return this._location(original);
@@ -588,7 +696,7 @@ class PenNameGenerator {
       case "US_SSN": return this._reshapeDigits(original);
       case "CREDIT_CARD": return this._reshapeDigits(original);
       case "IBAN_CODE": return this._reshapeAlnum(original);
-      case "DONATION_AMOUNT": return this._reshapeAmount(original);
+      case "DONATION_AMOUNT": return this._reshapeAmount(original, attempt);
       case "WEALTH_RATING":
         return /\d/.test(original) ? this._reshapeDigits(original) : this._reshapeAlnum(original);
       case "CONSTITUENT_ID":
@@ -713,7 +821,10 @@ function boundaryOk(text, i, item) {
     // Reshaped forms are short and common-looking: whole words only.
     return !(isWordChar(first) && isWordChar(before)) && !(isWordChar(last) && isWordChar(after));
   }
-  if (item.guard === "digits") return !(isDigit(first) && isDigit(before)) && !(isDigit(last) && isDigit(after));
+  if (item.guard === "digits") {
+    return !(isDigit(first) && isDigit(before)) &&
+      !(isDigit(last) && numberContinues(text, i + item.form.length));
+  }
   return true;
 }
 
@@ -800,7 +911,6 @@ class PennameSession {
 
   collectSpans(text) {
     let spans = text.trim() ? detectSpans(text) : [];
-    // Headings and labels are not donor data.
     // Headings and labels are not donor data — but a titled name
     // ("Kind regards, Mr Dorothy Marlowe.") must be trimmed to the real
     // name, not dropped: the title words are on the noise list.
@@ -825,8 +935,8 @@ class PennameSession {
         spans.push({ start: m.index, end: m.index + value.length, entity_type: type, score: 1.0, text: value });
       }
     }
-    spans = spans.filter((s) => !this.ignored.has(s.entity_type + "|" + s.text));
-    return selectSpans(spans);
+    spans = mergeAdjacentPersons(text, selectSpans(spans));
+    return spans.filter((s) => !this.ignored.has(s.entity_type + "|" + s.text));
   }
 
   pseudonymize(text) {
@@ -860,6 +970,9 @@ class PennameSession {
         return { text: newText, entries };
       }
       for (const span of spans) this.generator.forget(span.entity_type, span.text);
+      // Dates follow the fixed session shift, so regenerating alone would
+      // repeat the same clash: move this document's dates a year further.
+      this.generator.dateBump++;
     }
     throw new PenNameError("could not produce a reversible pseudonymization for this document");
   }

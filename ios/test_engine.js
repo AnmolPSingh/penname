@@ -116,9 +116,19 @@ check("mapping serialises/deserialises", JSON.stringify(back) === JSON.stringify
     ["initial + surname", "Signed, J. Smith", ["Smith"]],
     ["name part reused", "Dear Jane Smith,\nWe hope the Smith family is well. Jane, see you soon.", ["Smith", "Jane"]],
     ["name across a line break", "Regards\nJane Smith\nDirector of Giving", ["Jane Smith"]],
+    ["title followed by a greeting", "Thanks, Mrs Wilson Dear Jane Smith, hello", ["Wilson", "Jane", "Smith"]],
+    ["names side by side", "the Jane Smith Jane Smith Margaret.", ["Jane", "Smith", "Margaret"]],
     ["UK postcode", "12 High Street, Bristol BS1 4DJ.", ["BS1 4DJ"]],
     ["UK mobile, no spaces", "Call 07700900123 any time.", ["07700900123"]],
     ["international, no spaces", "Call +447700900123 any time.", ["447700900123"]],
+    ["UK international landline", "Call +44 20 7946 0958 now.", ["7946", "0958"]],
+    ["UK international with (0)", "Call +44 (0)20 7946 0958 now.", ["7946", "0958"]],
+    ["UK international mobile", "Call +44 7700 900123 now.", ["7700", "900123"]],
+    ["UK national landline", "Call 01632 960123 today.", ["01632", "960123"]],
+    ["UK mobile with a space", "Mob 07700 900123.", ["07700", "900123"]],
+    ["French number", "Tel +33 1 42 68 53 00.", ["42 68 53"]],
+    ["two phones in a row", "+44 20 7946 0958 +44 20 7946 0999", ["0958", "0999"]],
+    ["phone then a date", "+44 20 7946 0958 2024-06-01", ["0958", "2024-06-01"]],
     ["NI number", "NI number QQ 12 34 56 C on file.", ["QQ 12 34 56 C"]],
     ["sort code", "Sort code 20-00-00.", ["20-00-00"]],
     ["month and year", "Pledged in January 2024.", ["January 2024"]],
@@ -179,6 +189,80 @@ check("mapping serialises/deserialises", JSON.stringify(back) === JSON.stringify
     } catch (e) { monthOk = false; }
   }
   check("month-year dates always shift", monthOk);
+
+  // 13b. A shifted date that lands on another date in the document must not
+  // exhaust the generator (the session shift is fixed, so plain retries repeat).
+  let collideOk = true;
+  try {
+    const g = new E.PenNameGenerator(1);
+    g.dateDelta = -39; // April 22 -> March 14
+    const doc = "Received on March 14, 2025. Reception on April 22, 2025.";
+    const p = g.penNameFor("DATE_TIME", "April 22, 2025", doc);
+    collideOk = p !== "April 22, 2025" && !doc.includes(p);
+  } catch (e) { collideOk = false; }
+  check("date shift landing on another date still generates", collideOk);
+  const gm = new E.PenNameGenerator(1);
+  gm.dateDelta = -39;
+  check("spelled-out month stays spelled out when the month changes",
+    gm.penNameFor("DATE_TIME", "April 22, 2025", "") === "March 14, 2025");
+  check("abbreviated month stays abbreviated",
+    gm.penNameFor("DATE_TIME", "Apr 22, 2025", "") === "Mar 14, 2025");
+
+  const days = Array.from({ length: 366 }, (_, i) =>
+    new Date(Date.UTC(2024, 0, 1 + i)).toISOString().slice(0, 10));
+  let yearOk = false;
+  try {
+    const s = new E.PennameSession();
+    const doc = days.join("\n");
+    const r = s.pseudonymize(doc);
+    yearOk = r.entries.length === 366 && s.reverse(r.text, r.entries) === doc &&
+      r.entries.every((e) => !doc.includes(e.pen_name));
+  } catch (e) { console.log("    year of dates threw:", e.message); }
+  check("a year of daily dates all get stand-ins", yearOk);
+
+  // 13c. An amount must not swallow the next comma-separated column
+  const csvSpans = E.detectSpans("Gift,Date\n£25,2024-01-05\n£1,250,2024-02-06");
+  check("amount stops at the CSV column boundary",
+    csvSpans.some((x) => x.text === "£25") && csvSpans.some((x) => x.text === "£1,250") &&
+    csvSpans.filter((x) => x.entity_type === "DATE_TIME").length === 2);
+
+  // 13d. A gift list dense with amounts and dates still exports and round-trips
+  const gifts = ["Gift,Date"].concat(Array.from({ length: 400 }, (_, i) =>
+    `£${((i + 1) * 25).toLocaleString("en-US")},${days[i % 366]}`)).join("\n");
+  let giftsOk = false;
+  try {
+    const s = new E.PennameSession();
+    const r = s.pseudonymize(gifts);
+    giftsOk = s.reverse(r.text, r.entries) === gifts &&
+      r.entries.filter((e) => e.entity_type === "DONATION_AMOUNT").length === 400;
+  } catch (e) { console.log("    gift list threw:", e.message); }
+  check("400 distinct amounts with dates in a CSV", giftsOk);
+
+  // 13e. Name parts side by side must not recreate another name's stand-in
+  const adj = "at call gave call $5,000 Jane Smith Margaret C-10041 the email $5,000 12 Oak Road Jane Smith at.";
+  let adjOk = true;
+  for (let i = 0; i < 40; i++) {
+    try {
+      const s = new E.PennameSession();
+      const r = s.pseudonymize(adj);
+      if (s.reverse(r.text, r.entries) !== adj || r.text.includes("Jane") || r.text.includes("Smith")) adjOk = false;
+    } catch (e) { adjOk = false; }
+  }
+  check("adjacent name parts round-trip", adjOk);
+
+  // 13f. When the safety check fails on dates, a retry must move the dates
+  // (the session shift is fixed, so regenerating repeats the same clash).
+  const glued = "Mrs Wilson 2024-06-01 January 2024 5 June 2024 sincerely.";
+  let gluedOk = true;
+  for (const delta of [180, 181, 182, -180, -181]) {
+    try {
+      const s = new E.PennameSession(5);
+      s.generator.dateDelta = delta;
+      const r = s.pseudonymize(glued);
+      if (s.reverse(r.text, r.entries) !== glued) gluedOk = false;
+    } catch (e) { gluedOk = false; }
+  }
+  check("date clashes are retried with different dates", gluedOk);
 
   // 14. Restore copes with the ways an AI reshapes stand-ins
   const s14 = new E.PennameSession(3);

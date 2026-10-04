@@ -48,8 +48,8 @@ class PenNameGenerator:
         if cached is not None:
             return cached
 
-        for _ in range(_MAX_CANDIDATE_ATTEMPTS):
-            candidate = self._generate(entity_type, original)
+        for attempt in range(_MAX_CANDIDATE_ATTEMPTS):
+            candidate = self._generate(entity_type, original, attempt)
             if (
                 candidate
                 and candidate != original
@@ -81,7 +81,7 @@ class PenNameGenerator:
         self._used.add(pen_name)
         self._pinned.add(key)
 
-    def _generate(self, entity_type: str, original: str) -> str:
+    def _generate(self, entity_type: str, original: str, attempt: int = 0) -> str:
         f = self._faker
         if entity_type == "PERSON":
             return f.name()
@@ -92,7 +92,7 @@ class PenNameGenerator:
         if entity_type == "PHONE_NUMBER":
             return self._reshape_digits(original)
         if entity_type == "DATE_TIME":
-            shifted = self._shift_date(original)
+            shifted = self._shift_date(original, attempt)
             return shifted if shifted is not None else f.date(pattern="%B %d, %Y")
         if entity_type == "LOCATION":
             return f.city()
@@ -161,17 +161,25 @@ class PenNameGenerator:
             rendered = f"{int(new_value):,}" if has_grouping else f"{int(new_value)}"
         return original[: match.start()] + rendered + original[match.end() :]
 
-    def _shift_date(self, original: str) -> str | None:
+    def _shift_date(self, original: str, attempt: int = 0) -> str | None:
+        # The session shift is fixed, so a retry would reproduce the same date.
+        # When that date is unusable (it already appears in the document, or is
+        # another date's pen name), each retry pushes this one date a further
+        # year along instead.
+        sign = 1 if self._date_delta.days >= 0 else -1
+        delta = self._date_delta + timedelta(days=sign * 366 * attempt)
         for fmt in _DATE_FORMATS:
             try:
                 parsed = datetime.strptime(original, fmt)
             except ValueError:
                 continue
-            shifted = parsed + self._date_delta
+            try:
+                shifted = parsed + delta
+            except OverflowError:
+                return None
             if shifted.strftime(fmt) == original:
                 # Coarse formats (e.g. a bare year) can survive a small shift;
                 # push a full year further so the rendering actually changes.
-                sign = 1 if self._date_delta.days >= 0 else -1
                 shifted += timedelta(days=sign * 366)
             out = shifted.strftime(fmt)
             if parsed.strftime(fmt) != original:
