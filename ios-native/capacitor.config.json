@@ -3,7 +3,7 @@
   "appName": "Penname",
   "webDir": "www",
   "ios": {
-    "contentInset": "always",
+    "contentInset": "never",
     "backgroundColor": "#f7f5f1"
   },
   "server": {
