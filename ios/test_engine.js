@@ -180,6 +180,57 @@ check("mapping serialises/deserialises", JSON.stringify(back) === JSON.stringify
   }
   check("month-year dates always shift", monthOk);
 
+  // 14. Restore copes with the ways an AI reshapes stand-ins
+  const s14 = new E.PennameSession(3);
+  const src14 = "Dear Jane Smith, thank you for the gift of $1,000 on 2024-01-05.";
+  const r14 = s14.pseudonymize(src14);
+  const pen = (t) => r14.entries.find((e) => e.entity_type === t).pen_name;
+  const [pFirst, pLast] = pen("PERSON").split(" ");
+  const restoreOf = (reply) => E.reverseDetailed(reply, r14.entries);
+
+  check("restore: first name only", restoreOf(`Dear ${pFirst},`).text === "Dear Jane,");
+  check("restore: title + surname", restoreOf(`Mrs ${pLast} agreed.`).text === "Mrs Smith agreed.");
+  check("restore: possessive", restoreOf(`${pen("PERSON")}'s gift`).text === "Jane Smith's gift");
+  check("restore: upper case", restoreOf(pen("PERSON").toUpperCase()).text === "JANE SMITH");
+  const d14 = new Date(pen("DATE_TIME") + "T00:00:00Z");
+  const months = ["January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December"];
+  const ukDate = `${d14.getUTCDate()} ${months[d14.getUTCMonth()]} ${d14.getUTCFullYear()}`;
+  const usDate = `${months[d14.getUTCMonth()]} ${d14.getUTCDate()}, ${d14.getUTCFullYear()}`;
+  check("restore: date rewritten UK style", restoreOf(`on ${ukDate}.`).text === "on 5 January 2024.");
+  check("restore: date rewritten US style", restoreOf(`on ${usDate}.`).text === "on January 5, 2024.");
+  check("restore: stand-in inside a longer number untouched",
+    restoreOf(`Total: ${pen("DONATION_AMOUNT")}0 raised.`).text === `Total: ${pen("DONATION_AMOUNT")}0 raised.`);
+  check("restore: part of a longer word untouched",
+    restoreOf(`${pLast}shire is lovely.`).text === `${pLast}shire is lovely.`);
+
+  const det14 = restoreOf(`Dear ${pFirst}, your ${pen("DONATION_AMOUNT")} gift.`);
+  check("restore reports what it changed",
+    det14.restored === 2 && det14.segments.filter((g) => g.original !== undefined).map((g) => g.original).join("|") === "Jane|$1,000");
+
+  // Two people whose stand-ins share a first name: "Dear <first>" is ambiguous
+  // and must be left alone and reported, never guessed.
+  const amb = [
+    { original: "Jane Smith", pen_name: "Nora Lockwood", entity_type: "PERSON", score: 1 },
+    { original: "Ann Jones", pen_name: "Nora Hollis", entity_type: "PERSON", score: 1 },
+  ];
+  const a14 = E.reverseDetailed("Dear Nora, and Nora Hollis.", amb);
+  check("ambiguous first name left as is and reported",
+    a14.text === "Dear Nora, and Ann Jones." && a14.ambiguous.includes("Nora"));
+
+  // Variant-aware restore still round-trips whole documents
+  let variantFuzz = true;
+  for (let i = 0; i < 100; i++) {
+    const doc = Array.from({ length: 8 + (i % 10) }, () =>
+      words[Math.floor(Math.random() * words.length)]).join(" ") + ". Jane said hi to Smith.";
+    try {
+      const s = new E.PennameSession();
+      const r = s.pseudonymize(doc);
+      if (E.reverseDetailed(r.text, r.entries).text !== doc) { variantFuzz = false; console.log("variant fuzz fail:", doc); break; }
+    } catch (e) { variantFuzz = false; console.log("variant fuzz error:", e.message); break; }
+  }
+  check("fuzz: variant-aware restore round-trips 100 docs", variantFuzz);
+
   console.log(failures === 0 ? "\nALL TESTS PASSED" : "\n" + failures + " FAILURES");
   process.exit(failures === 0 ? 0 : 1);
 })();

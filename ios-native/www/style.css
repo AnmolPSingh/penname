@@ -336,6 +336,25 @@ textarea.small { min-height: 96px; }
   -webkit-overflow-scrolling: touch;
 }
 
+/* Restored values in the restore output: amber underline on the dark panel
+   so every put-back detail can be checked; the stand-in shows on hover/long-press. */
+.output mark.restored {
+  background: rgba(242, 182, 85, 0.16);
+  color: inherit;
+  border-bottom: 1.5px solid var(--amber);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.restore-report { font-size: 13px; line-height: 1.5; margin: 0 0 var(--sp-sm); color: var(--ink); }
+.restore-report.warn {
+  color: var(--ink);
+  background: rgba(242, 182, 85, 0.18);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--rounded-md);
+  padding: 8px 12px;
+}
+
 /* Success note — teal-bright edge, per brand's sparing bright-teal use */
 .success-note {
   display: flex; gap: 8px; align-items: flex-start;

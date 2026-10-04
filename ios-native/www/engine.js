@@ -155,7 +155,7 @@ const DETECTORS = [
   { type: "US_SSN", score: 0.9,
     re: /\b\d{3}-\d{2}-\d{4}\b/g },
   { type: "DONATION_AMOUNT", score: 0.85,
-    re: /[$£€]\s?\d[\d,]*(?:\.\d{1,2})?(?:\s?(?:K|M|million|billion|bn)\b)?/g },
+    re: /[$£€]\s?\d[\d,]*(?:\.\d{1,2}(?!\d))?(?:\s?(?:K|M|million|billion|bn)\b)?/g },
   { type: "DATE_TIME", score: 0.8,
     re: /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4}\b/gi },
   { type: "DATE_TIME", score: 0.8,
@@ -303,9 +303,12 @@ function detectSpans(text) {
 /* Pen-name generation (format-aware, session-consistent)             */
 /* ------------------------------------------------------------------ */
 
-const FIRST_NAMES = ("Dorothy Eleanor Margaret Joan Barbara Alice Florence Grace Edith " +
-  "Martha Clara Rose Helen Iris Vera Nora Beatrice Sylvia Agnes Frances " +
-  "Harold Walter Arthur Frank Albert Ernest Herbert Ronald Leonard Peter " +
+/* No first names that double as everyday words or places (Grace, Rose,
+ * Frank, Florence): restore matches bare first names, so they must not
+ * collide with ordinary text. */
+const FIRST_NAMES = ("Dorothy Eleanor Margaret Joan Barbara Alice Mabel Winifred Edith " +
+  "Martha Clara Hilda Helen Doris Vera Nora Beatrice Sylvia Agnes Frances " +
+  "Harold Walter Arthur Cyril Albert Ernest Herbert Ronald Leonard Horace " +
   "Gerald Raymond Clifford Maurice Stanley Bernard Dennis Geoffrey Brian").split(" ");
 
 const LAST_NAMES = ("Hartley Whitfield Ashworth Pemberton Fairbanks Hollis Kirkbride " +
@@ -367,6 +370,11 @@ class PenNameGenerator {
     if (cached !== undefined) return cached;
     const accept = (candidate) => {
       if (!candidate || candidate === original || this.used.has(candidate) || avoidText.includes(candidate)) {
+        return false;
+      }
+      // Restore also matches a stand-in's first name or surname alone, so
+      // neither may already occur in the document.
+      if (entityType === "PERSON" && candidate.split(NAME_SPLIT).some((w) => w.length > 2 && avoidText.includes(w))) {
         return false;
       }
       this.cache.set(key, candidate);
@@ -465,6 +473,9 @@ class PenNameGenerator {
     const value = parseFloat(raw.replace(/,/g, ""));
     const factor = this._int(60, 175) / 100; // 0.60x .. 1.75x
     let newValue = Math.max(1, Math.round(value * factor));
+    // Avoid round stand-ins: an AI writes round figures of its own, and a
+    // coincidence would be "restored" into the wrong amount.
+    if (newValue >= 20 && newValue % 10 === 0) newValue += this._int(1, 9);
     let rendered;
     if (hasCents) {
       rendered = hasGrouping
@@ -605,32 +616,159 @@ function applyReplacements(text, replacements) {
   return pieces.join("");
 }
 
-function reverseText(text, entries) {
-  if (!entries.length) return text;
-  // Leftmost, longest-first matching (same result as a longest-first regex
-  // alternation). Stand-ins are bucketed by their first two characters: a
-  // single alternation of thousands of stand-ins costs text × stand-ins.
-  const lookup = new Map(entries.filter((e) => e.pen_name).map((e) => [e.pen_name, e.original]));
-  const buckets = new Map();
-  for (const pen of lookup.keys()) {
-    const k = pen.slice(0, 2);
-    if (!buckets.has(k)) buckets.set(k, []);
-    buckets.get(k).push(pen);
+/* --- Restore ------------------------------------------------------- */
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July",
+  "August", "September", "October", "November", "December"];
+const ordinal = (d) => (d % 10 === 1 && d !== 11 ? "st" : d % 10 === 2 && d !== 12 ? "nd" :
+  d % 10 === 3 && d !== 13 ? "rd" : "th");
+const pad2 = (n) => String(n).padStart(2, "0");
+
+/** Parse the full-date shapes the generator produces. US numeric order, as
+ *  in _shiftDate. Returns null for anything partial or unparseable. */
+function parseFullDate(s) {
+  let m;
+  const ok = (y, mo, d) => (mo >= 1 && mo <= 12 && d >= 1 && d <= 31 ? { y, mo, d } : null);
+  if ((m = s.match(/^([A-Za-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$/))) return ok(+m[3], MONTHS[m[1].toLowerCase()], +m[2]);
+  if ((m = s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\.?,?\s+(\d{4})$/))) return ok(+m[3], MONTHS[m[2].toLowerCase()], +m[1]);
+  if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/))) return ok(+m[1], +m[2], +m[3]);
+  if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/))) return ok(+m[3], +m[1], +m[2]);
+  return null;
+}
+
+/* Ways an AI commonly rewrites a date. Each renders both the stand-in and
+ * the real date, so "16 May 2023" maps back to "5 January 2024". */
+const DATE_STYLES = [
+  ({ y, mo, d }) => `${MONTH_NAMES[mo - 1]} ${d}, ${y}`,
+  ({ y, mo, d }) => `${MONTH_NAMES[mo - 1].slice(0, 3)} ${d}, ${y}`,
+  ({ y, mo, d }) => `${MONTH_NAMES[mo - 1]} ${d}${ordinal(d)}, ${y}`,
+  ({ y, mo, d }) => `${d} ${MONTH_NAMES[mo - 1]} ${y}`,
+  ({ y, mo, d }) => `${d} ${MONTH_NAMES[mo - 1].slice(0, 3)} ${y}`,
+  ({ y, mo, d }) => `${d}${ordinal(d)} ${MONTH_NAMES[mo - 1]} ${y}`,
+  ({ y, mo, d }) => `${y}-${pad2(mo)}-${pad2(d)}`,
+  ({ mo, d }) => `${d} ${MONTH_NAMES[mo - 1]}`,
+  ({ mo, d }) => `${MONTH_NAMES[mo - 1]} ${d}`,
+];
+
+/** Everything restore looks for: exact stand-ins plus the reshaped forms an
+ *  AI tends to write (first name, surname, upper case, reworded dates).
+ *  A reshaped form that could belong to two different real values is not
+ *  guessed — it is marked ambiguous, left alone and reported. */
+function buildRestoreTable(entries) {
+  const exact = new Map();
+  for (const e of entries) if (e.pen_name) exact.set(e.pen_name, e);
+  const variants = new Map(); // form -> original, or null when ambiguous
+  let own = new Map();        // forms from the current entry: first style wins
+  const addVariant = (form, original) => {
+    if (form && form !== original && !exact.has(form) && !own.has(form)) own.set(form, original);
+  };
+  for (const e of exact.values()) {
+    own = new Map();
+    collectVariants(e, addVariant);
+    // Two different stand-ins producing the same form is ambiguous.
+    for (const [form, original] of own) {
+      variants.set(form, variants.has(form) && variants.get(form) !== original ? null : original);
+    }
   }
-  for (const list of buckets.values()) list.sort((a, b) => b.length - a.length);
-  const out = [];
+  const table = [];
+  for (const [form, e] of exact) {
+    // An amount stand-in followed by another digit is a different number.
+    table.push({ form, original: e.original, guard: e.entity_type === "DONATION_AMOUNT" ? "digits" : null });
+  }
+  for (const [form, original] of variants) {
+    table.push({ form, original, guard: "word", ambiguous: original === null });
+  }
+  return table;
+}
+
+/** The reshaped forms of one mapping entry, fullest form first. */
+function collectVariants(e, addVariant) {
+  if (e.entity_type === "PERSON") {
+    const real = e.original.split(NAME_SPLIT);
+    const pen = e.pen_name.split(NAME_SPLIT);
+    if (real.length >= 2 && pen.length >= 2) {
+      addVariant(pen[0], real[0]);
+      addVariant(pen[pen.length - 1], real[real.length - 1]);
+      addVariant(pen[0].toUpperCase(), real[0].toUpperCase());
+      addVariant(pen[pen.length - 1].toUpperCase(), real[real.length - 1].toUpperCase());
+    }
+  }
+  if (e.entity_type === "DATE_TIME") {
+    const real = parseFullDate(e.original);
+    const pen = parseFullDate(e.pen_name);
+    if (real && pen) for (const style of DATE_STYLES) addVariant(style(pen), style(real));
+  }
+  if (/\p{Ll}/u.test(e.pen_name)) addVariant(e.pen_name.toUpperCase(), e.original.toUpperCase());
+}
+
+const isWordChar = (ch) => !!ch && /[\p{L}\p{N}]/u.test(ch);
+const isDigit = (ch) => !!ch && ch >= "0" && ch <= "9";
+
+function boundaryOk(text, i, item) {
+  const before = text[i - 1];
+  const after = text[i + item.form.length];
+  const first = item.form[0];
+  const last = item.form[item.form.length - 1];
+  if (item.guard === "word") {
+    // Reshaped forms are short and common-looking: whole words only.
+    return !(isWordChar(first) && isWordChar(before)) && !(isWordChar(last) && isWordChar(after));
+  }
+  if (item.guard === "digits") return !(isDigit(first) && isDigit(before)) && !(isDigit(last) && isDigit(after));
+  return true;
+}
+
+/** Restore real values into text. Leftmost, longest-first matching; forms
+ *  are bucketed by their first two characters, because one alternation of
+ *  thousands of stand-ins costs text × stand-ins.
+ *  Returns { text, segments, restored, ambiguous } — segments carry
+ *  `original` where something was put back, so the UI can highlight it. */
+function reverseWithTable(text, table) {
+  const buckets = new Map();
+  for (const item of table) {
+    const k = item.form.slice(0, 2);
+    if (!buckets.has(k)) buckets.set(k, []);
+    buckets.get(k).push(item);
+  }
+  for (const list of buckets.values()) list.sort((a, b) => b.form.length - a.form.length);
+  const segments = [];
+  const ambiguous = new Set();
+  let restored = 0;
   let last = 0;
   let i = 0;
   while (i < text.length) {
     const candidates = (buckets.get(text.slice(i, i + 2)) || []).concat(buckets.get(text[i]) || []);
-    const pen = candidates.find((p) => text.startsWith(p, i));
-    if (pen === undefined) { i++; continue; }
-    out.push(text.slice(last, i), lookup.get(pen));
-    i += pen.length;
+    const item = candidates.find((c) => text.startsWith(c.form, i) && boundaryOk(text, i, c));
+    if (!item) { i++; continue; }
+    if (item.ambiguous) {
+      ambiguous.add(item.form);
+      i += item.form.length;
+      continue;
+    }
+    if (i > last) segments.push({ text: text.slice(last, i) });
+    segments.push({ text: item.original, original: item.original, standIn: item.form });
+    restored++;
+    i += item.form.length;
     last = i;
   }
-  out.push(text.slice(last));
-  return out.join("");
+  if (last < text.length) segments.push({ text: text.slice(last) });
+  return { text: segments.map((g) => g.text).join(""), segments, restored, ambiguous: [...ambiguous] };
+}
+
+/** Restore exact stand-ins only — used to self-verify a pseudonymization. */
+function reverseExact(text, entries) {
+  if (!entries.length) return text;
+  return reverseWithTable(text, entries.filter((e) => e.pen_name)
+    .map((e) => ({ form: e.pen_name, original: e.original, guard: null }))).text;
+}
+
+/** Restore an AI reply: exact stand-ins plus reshaped forms, with a report. */
+function reverseDetailed(text, entries) {
+  if (!entries.length) return { text, segments: [{ text }], restored: 0, ambiguous: [] };
+  return reverseWithTable(text, buildRestoreTable(entries));
+}
+
+function reverseText(text, entries) {
+  return reverseDetailed(text, entries).text;
 }
 
 /* ------------------------------------------------------------------ */
@@ -716,8 +854,9 @@ class PennameSession {
       }
       const entries = [...seen.values()];
       const newText = applyReplacements(text, replacements);
-      // Self-verification: the round trip must hold before we return.
-      if (reverseText(newText, entries) === text) {
+      // Self-verification: the round trip must hold before we return —
+      // both exactly and with the reshaped forms restore also accepts.
+      if (reverseExact(newText, entries) === text && reverseText(newText, entries) === text) {
         return { text: newText, entries };
       }
       for (const span of spans) this.generator.forget(span.entity_type, span.text);
@@ -840,7 +979,7 @@ async function decryptMapping(blob, passphrase) {
 
 const PennameEngine = {
   PennameSession, PenNameGenerator, PenNameError,
-  detectSpans, selectSpans, applyReplacements, reverseText,
+  detectSpans, selectSpans, applyReplacements, reverseText, reverseDetailed, reverseExact,
   mappingToDict, mappingFromDict, encryptMapping, decryptMapping, decryptMappingRaw,
 };
 

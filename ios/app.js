@@ -408,10 +408,10 @@ $("btn-restore").addEventListener("click", async () => {
     const entries = E.mappingFromDict(raw);
     const reply = $("restore-input").value;
     if (!reply.trim()) throw new Error("Paste your assistant's reply first.");
-    const restored = E.reverseText(reply, entries);
-    out.textContent = restored;
+    const result = E.reverseDetailed(reply, entries);
+    renderRestored(result);
     $("restore-actions").classList.remove("hidden");
-    state._restored = restored;
+    state._restored = result.text;
 
     // Match the key file back to the document it came from (hash only).
     let matchNote = "";
@@ -430,7 +430,7 @@ $("btn-restore").addEventListener("click", async () => {
     await Activity.log("restore", {
       doc: raw.doc_name || "(unknown document)",
       hash: raw.doc_hash || null,
-      details: `${entries.length} details restored`,
+      details: `${result.restored} detail${result.restored === 1 ? "" : "s"} restored`,
       keyFile: state.keyFileName || null,
     });
   } catch (e) {
@@ -439,6 +439,33 @@ $("btn-restore").addEventListener("click", async () => {
     $("restore-actions").classList.add("hidden");
   }
 });
+
+/** Show the restored text with every put-back value highlighted, a count,
+ *  and a warning for anything restore deliberately did not guess. */
+function renderRestored(result) {
+  const out = $("restore-output");
+  out.textContent = "";
+  for (const seg of result.segments) {
+    if (seg.original === undefined) { out.append(seg.text); continue; }
+    const mark = document.createElement("mark");
+    mark.className = "restored";
+    mark.textContent = seg.text;
+    mark.title = "Was: " + seg.standIn;
+    out.append(mark);
+  }
+  $("restore-summary").textContent = result.restored
+    ? `${result.restored} detail${result.restored === 1 ? "" : "s"} put back — highlighted below. ` +
+      "Glance over them: if the reply reused a stand-in for something new, it is highlighted too."
+    : "No stand-ins were found in this reply, so nothing was changed. Check it is the reply to the protected document.";
+  const warn = $("restore-warning");
+  if (result.ambiguous.length) {
+    warn.textContent = "Left as is, because it could belong to more than one real person or date: " +
+      result.ambiguous.map((a) => `“${a}”`).join(", ") + ". Fix these by hand.";
+    warn.classList.remove("hidden");
+  } else {
+    warn.classList.add("hidden");
+  }
+}
 
 $("btn-copy-restored").addEventListener("click", async () => {
   await copyText(state._restored || "", $("btn-copy-restored"));
