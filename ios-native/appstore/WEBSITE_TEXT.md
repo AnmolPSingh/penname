@@ -2,18 +2,18 @@
 
 Both pages are **live** as of 5 October 2026 (philanthropel.com v1.7.0):
 
-- Support URL: https://philanthropel.com/support
+- Support URL: https://philanthropel.com/penname/support
 - Privacy Policy URL: https://philanthropel.com/privacy (now has a
   "The Penname app" section)
 
-The published wording is in the website project (`app/support/page.tsx`,
+The published wording is in the website project (`app/penname/support/page.tsx`,
 `app/privacy/page.tsx` and their markdown mirrors in `public/md/`). The text
 below is the draft it was written from, kept for reference. Contact address
 used on the site: info@philanthropel.com.
 
 ---
 
-## 1. Support page — philanthropel.com/support
+## 1. Support page — philanthropel.com/penname/support
 
 ### Penname support
 

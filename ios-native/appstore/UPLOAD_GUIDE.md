@@ -29,7 +29,7 @@ Xcode then creates the App Store provisioning profile automatically.
 ## 3. Before you submit — external prerequisites
 - **Privacy policy**: https://philanthropel.com/privacy is live and has a
   Penname section.
-- **Support page**: https://philanthropel.com/support is live.
+- **Support page**: https://philanthropel.com/penname/support is live.
 - **App Store Connect record**: create app "Penname" with bundle ID
   com.philanthropel.penname, fill name/subtitle/description/keywords/
   screenshots from APP_METADATA.md.

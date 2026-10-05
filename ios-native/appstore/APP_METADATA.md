@@ -38,7 +38,7 @@ compliant by itself and it is not a legal tool. Always review the safe copy —
 the app shows you everything it found and lets you add anything it missed.
 
 ## Support URL
-https://philanthropel.com/support      (live)
+https://philanthropel.com/penname/support      (live)
 
 ## Privacy Policy URL (REQUIRED by App Store Connect)
 https://philanthropel.com/privacy      (live; includes a Penname section)
