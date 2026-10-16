@@ -7,6 +7,11 @@
 	     exempt, so App Store Connect does not ask on every upload. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Shown only if macOS asks about the Downloads folder. Penname has no
+	     Downloads entitlement; it reads and writes only files the user picks
+	     in the Open and Save dialogs, which may be in Downloads. -->
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Penname opens and saves only the files you choose. For example, if you save your encrypted key file (penname-key.pnmap) to Downloads, Penname needs access to write it there and to open it again when you restore a document.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Philanthropel Limited</string>
 </dict>

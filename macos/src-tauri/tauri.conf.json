@@ -39,6 +39,7 @@
     "shortDescription": "Private details get pen names.",
     "longDescription": "Penname gives private details a pen name before you share a document with an AI assistant — and brings the real details back afterwards. Runs entirely on your device: no server, no analytics, no network.",
     "macOS": {
+      "bundleVersion": "1.0.1",
       "minimumSystemVersion": "12.0",
       "signingIdentity": null,
       "entitlements": "entitlements.plist"

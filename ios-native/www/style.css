@@ -446,6 +446,8 @@ textarea.small { min-height: 96px; }
 }
 .divider { border: none; border-top: 1px solid var(--hairline-soft); margin: var(--sp-md) 0; }
 .about .card:first-child .philanthropel-row { margin-bottom: 0; }
+.about-links { display: flex; flex-wrap: wrap; gap: var(--sp-md); margin: var(--sp-md) 0 0; }
+.about-links a { color: var(--emerald); font-weight: 600; text-underline-offset: 3px; }
 .about-fineprint { font-size: 0.7647rem; line-height: 1.5; color: var(--muted-soft); margin: var(--sp-md) 0 0; }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;

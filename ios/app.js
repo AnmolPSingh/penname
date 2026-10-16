@@ -27,16 +27,16 @@ const TYPE_LABELS = {
   CUSTOM: "Custom",
 };
 
-/* The macOS app (Tauri) saves downloads straight to the Downloads folder. */
+/* The macOS app (Tauri) saves through a Save dialog in its native shell. */
 const IS_MAC_APP = !!window.__TAURI_INTERNALS__;
-const SAVED_WHERE = IS_MAC_APP ? "Saved to Downloads ✓" : "Saved ✓";
+const SAVED_WHERE = "Saved ✓";
 
 const MIN_PASSPHRASE = 8;
 const MAX_DOCUMENT_CHARS = 1000000; // ~1 MB of text; larger files stall a phone
 
 /* In the iOS app (and iOS Safari) a download link does nothing useful, so
  * files go through the system share sheet, which offers "Save to Files".
- * Desktop browsers and the macOS app keep the ordinary download. */
+ * Desktop browsers keep the ordinary download. */
 const SHARE_FILES =
   !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -371,9 +371,7 @@ $("btn-download-key").addEventListener("click", async () => {
     state.pendingKey = null;
     note.textContent = SHARE_FILES
       ? "✓ Key file handed over. If you chose “Save to Files”, it is on this device — keep it with your passphrase."
-      : IS_MAC_APP
-        ? "✓ Key file saved to your Downloads folder. Keep it somewhere safe, with your passphrase."
-        : "✓ Key file saved. Keep it somewhere safe on this device.";
+      : "✓ Key file saved. Keep it somewhere safe, with your passphrase.";
     note.classList.remove("hidden");
     await Activity.log("key-saved", {
       doc: state.docName,
@@ -577,6 +575,14 @@ function flash(btn, label) {
  *  "downloaded", "cancelled" (user closed the share sheet) or "needs-tap"
  *  (the share sheet needs a fresh tap). Other failures throw. */
 async function saveFile(blob, filename) {
+  if (IS_MAC_APP) {
+    const bytes = Array.from(new Uint8Array(await blob.arrayBuffer()));
+    let saved;
+    try {
+      saved = await window.__TAURI_INTERNALS__.invoke("save_file", { name: filename, bytes });
+    } catch (e) { throw new Error(String(e)); } // the shell rejects with a plain string
+    return saved ? "downloaded" : "cancelled";
+  }
   if (!SHARE_FILES) {
     downloadBlob(blob, filename);
     return "downloaded";
@@ -608,13 +614,10 @@ function downloadBlob(blob, filename) {
 
 /* ---------------- Init ---------------- */
 
-// The Mac app is sandboxed with no way to open a browser, so the
-// Philanthropel credits are shown as plain text there, not dead links.
+// The Mac shell hands ordinary navigations to philanthropel.com to the
+// default browser; a new-window request would be dropped, so no target there.
 if (IS_MAC_APP) {
-  document.querySelectorAll('a[href^="https://philanthropel.com"]').forEach((a) => {
-    a.removeAttribute("href");
-    a.removeAttribute("target");
-  });
+  document.querySelectorAll('a[href^="https://philanthropel.com"]').forEach((a) => a.removeAttribute("target"));
 }
 
 showTab("protect");
