@@ -77,7 +77,7 @@ jobs:
         shell: bash
         run: |
           npm ci
-          npm run sync
+          npm run --script-shell=bash sync  # the script uses cp/rm, not cmd.exe
           npx tauri build --bundles nsis
           mkdir -p "$GITHUB_WORKSPACE/out"
           cp src-tauri/target/release/bundle/nsis/*-setup.exe "$GITHUB_WORKSPACE/out/Penname-windows-setup.exe"

@@ -4,7 +4,7 @@
   "private": true,
   "description": "Penname for iOS and Android \u2014 native shell (Capacitor) around the Penname Mobile web app",
   "scripts": {
-    "sync": "rsync -a ../ios/index.html ../ios/style.css ../ios/app.js ../ios/gazetteer.js ../ios/engine.js ../ios/activity.js ../ios/sw.js ../ios/manifest.webmanifest www/ && rsync -a --delete ../ios/icons/ www/icons/ && rsync -a --delete ../ios/fonts/ www/fonts/ && rsync -a www/ ios/App/App/public/ && rsync -a www/ android/app/src/main/assets/public/ && echo 'www and the iOS and Android bundles synced from ../ios'",
+    "sync": "rsync -a ../ios/index.html ../ios/style.css ../ios/app.js ../ios/gazetteer.js ../ios/engine.js ../ios/activity.js ../ios/sw.js ../ios/manifest.webmanifest www/ && rsync -a --delete ../ios/icons/ www/icons/ && rsync -a --delete ../ios/fonts/ www/fonts/ && rsync -a www/ ios/App/App/public/ && mkdir -p android/app/src/main/assets/public && rsync -a www/ android/app/src/main/assets/public/ && echo 'www and the iOS and Android bundles synced from ../ios'",
     "cap:sync": "cap sync ios"
   },
   "dependencies": {
