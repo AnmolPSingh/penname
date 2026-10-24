@@ -27,20 +27,25 @@ const TYPE_LABELS = {
   CUSTOM: "Custom",
 };
 
-/* The macOS app (Tauri) saves downloads straight to the Downloads folder. */
+/* The macOS app (Tauri) saves through a Save dialog in its native shell. */
 const IS_MAC_APP = !!window.__TAURI_INTERNALS__;
-const SAVED_WHERE = IS_MAC_APP ? "Saved to Downloads ✓" : "Saved ✓";
+
+/* The Android app has no share-to-Files or download, so it writes into the
+ * phone's Documents/Penname folder, where the file picker finds it again. */
+const IS_ANDROID_APP = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === "android");
+const ANDROID_FOLDER = "Penname";
+const SAVED_WHERE = IS_ANDROID_APP ? "Saved to Documents ✓" : "Saved ✓";
 
 const MIN_PASSPHRASE = 8;
 const MAX_DOCUMENT_CHARS = 1000000; // ~1 MB of text; larger files stall a phone
 
 /* In the iOS app (and iOS Safari) a download link does nothing useful, so
  * files go through the system share sheet, which offers "Save to Files".
- * Desktop browsers and the macOS app keep the ordinary download. */
-const SHARE_FILES =
+ * Desktop browsers keep the ordinary download. */
+const SHARE_FILES = !IS_ANDROID_APP && (
   !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
 /* ---------------- App state ---------------- */
 
@@ -369,11 +374,11 @@ $("btn-download-key").addEventListener("click", async () => {
     }
     if (outcome === "cancelled") return;
     state.pendingKey = null;
-    note.textContent = SHARE_FILES
+    note.textContent = IS_ANDROID_APP
+      ? `✓ Key file saved in Documents › ${ANDROID_FOLDER}. Keep it somewhere safe, with your passphrase.`
+      : SHARE_FILES
       ? "✓ Key file handed over. If you chose “Save to Files”, it is on this device — keep it with your passphrase."
-      : IS_MAC_APP
-        ? "✓ Key file saved to your Downloads folder. Keep it somewhere safe, with your passphrase."
-        : "✓ Key file saved. Keep it somewhere safe on this device.";
+      : "✓ Key file saved. Keep it somewhere safe, with your passphrase.";
     note.classList.remove("hidden");
     await Activity.log("key-saved", {
       doc: state.docName,
@@ -577,6 +582,18 @@ function flash(btn, label) {
  *  "downloaded", "cancelled" (user closed the share sheet) or "needs-tap"
  *  (the share sheet needs a fresh tap). Other failures throw. */
 async function saveFile(blob, filename) {
+  if (IS_MAC_APP) {
+    const bytes = Array.from(new Uint8Array(await blob.arrayBuffer()));
+    let saved;
+    try {
+      saved = await window.__TAURI_INTERNALS__.invoke("save_file", { name: filename, bytes });
+    } catch (e) { throw new Error(String(e)); } // the shell rejects with a plain string
+    return saved ? "downloaded" : "cancelled";
+  }
+  if (IS_ANDROID_APP) {
+    await saveToAndroidDocuments(blob, filename);
+    return "downloaded";
+  }
   if (!SHARE_FILES) {
     downloadBlob(blob, filename);
     return "downloaded";
@@ -595,6 +612,25 @@ async function saveFile(blob, filename) {
   }
 }
 
+/** Write into Documents/Penname. A file left by an earlier install belongs to
+ *  that install and cannot be overwritten, so a clash gets a numbered name. */
+async function saveToAndroidDocuments(blob, filename) {
+  const fs = window.Capacitor.Plugins.Filesystem;
+  const data = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1]);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+  const dot = filename.lastIndexOf(".");
+  const write = (name) => fs.writeFile({ path: `${ANDROID_FOLDER}/${name}`, data, directory: "DOCUMENTS", recursive: true });
+  try {
+    await write(filename);
+  } catch (e) {
+    await write(`${filename.slice(0, dot)}-${Date.now()}${filename.slice(dot)}`);
+  }
+}
+
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -608,13 +644,10 @@ function downloadBlob(blob, filename) {
 
 /* ---------------- Init ---------------- */
 
-// The Mac app is sandboxed with no way to open a browser, so the
-// Philanthropel credits are shown as plain text there, not dead links.
+// The Mac shell hands ordinary navigations to philanthropel.com to the
+// default browser; a new-window request would be dropped, so no target there.
 if (IS_MAC_APP) {
-  document.querySelectorAll('a[href^="https://philanthropel.com"]').forEach((a) => {
-    a.removeAttribute("href");
-    a.removeAttribute("target");
-  });
+  document.querySelectorAll('a[href^="https://philanthropel.com"]').forEach((a) => a.removeAttribute("target"));
 }
 
 showTab("protect");

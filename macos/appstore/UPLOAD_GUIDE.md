@@ -10,19 +10,28 @@ Verified on this Mac with a sandboxed, ad-hoc signed build:
 
 - The app starts under the App Sandbox and loads its bundled pages.
 - Protect → encrypt key file → restore returns the original text exactly.
-- "Save" buttons write to the user's Downloads folder (never overwriting:
-  a second file becomes `penname-key (1).pnmap`).
+- Version 1.0.0 only: "Save" buttons wrote straight to the Downloads
+  folder. App Review questioned that entitlement (guideline 2.4.5(i)), so
+  later builds use a Save dialog instead; see "Not yet verified".
 - No insecure-HTTP exception; `ITSAppUsesNonExemptEncryption` is `false`.
 
-Not yet verified — needs a person at the keyboard or a real signature:
+Verified on the TestFlight build of 1.0.0 (6 October 2026):
 
-- Choosing a document and a `.pnmap` key file through the Open dialog.
-- The Activity log on a properly signed build. It stores an encryption key
-  through WebKit, which keeps a "Penname WebCrypto Master Key" item in the
-  Keychain. Re-signed test builds trigger a Keychain prompt; a build with
-  one stable signature should not. Check this on the first signed build.
-- App Review. Version 1.0.0 was uploaded and passed Apple's upload checks;
-  it has not been reviewed.
+- Choosing a `.pnmap` key file through the Open dialog, and the full
+  protect and restore flow.
+- The Activity log shows no Keychain prompt on a Mac that has never run a
+  test build. WebKit keeps a "Penname WebCrypto Master Key" item in the
+  Keychain; an item left by a differently signed test build does prompt,
+  and deleting it (`security delete-generic-password -l "Penname WebCrypto
+  Master Key"`) clears that.
+
+Verified on a sandboxed, ad-hoc signed build of the Save-dialog version
+(9 October 2026), not yet on a store-signed build:
+
+- The Save dialog for the safe copy and the key file, and restoring with a
+  key file chosen through the Open dialog.
+- The Privacy policy, Help and support, and philanthropel.com links open in
+  the default browser.
 
 ## What you need (one-time)
 
@@ -57,8 +66,10 @@ readable crash reports are.
   files without this entitlement; without it the window is blank. The app's
   content security policy allows only its own files. Say exactly this in the
   review notes if asked.
-- **Downloads folder entitlement.** Used to save the safe copy, the
-  encrypted key file, restored text and the Activity CSV.
+- **User-selected files (read/write).** Open dialog for a document or a key
+  file; Save dialog for the safe copy, the encrypted key file, restored text
+  and the Activity CSV. There is no Downloads folder entitlement after
+  1.0.0.
 - **Apple silicon only.** The build is arm64, so the minimum system is
   macOS 12. For Intel Macs, install the `x86_64-apple-darwin` Rust target
   and build with `--target universal-apple-darwin`.

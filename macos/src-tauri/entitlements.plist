@@ -4,9 +4,9 @@
 <dict>
 	<!-- Mac App Store entitlements: minimal by design.
 	     - Sandbox on (required by the Mac App Store).
-	     - Read files the user picks (a document, a .pnmap key file).
-	     - Write to the Downloads folder (safe copy, key file, restored
-	       text, Activity CSV).
+	     - Read files the user picks in the Open dialog (a document, a
+	       .pnmap key file) and write files where the user chooses in the
+	       Save dialog (safe copy, key file, restored text, Activity CSV).
 	     - "Outgoing connections": required for the web view to start at
 	       all. A sandboxed WKWebView cannot load even its own bundled
 	       files without it (the window stays blank). The app itself makes
@@ -21,9 +21,7 @@
 	     See macos/appstore/UPLOAD_GUIDE.md. -->
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
-	<key>com.apple.security.files.user-selected.read-only</key>
-	<true/>
-	<key>com.apple.security.files.downloads.read-write</key>
+	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>

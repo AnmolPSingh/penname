@@ -1,17 +1,19 @@
-# Website text to publish before submission
+# Website text for the App Store listing
 
-App Store Connect needs two working links. Both are drafts for you to edit —
-check the contact address and company details before publishing.
+Both pages are **live** as of 5 October 2026 (philanthropel.com v1.7.0):
 
-- Support URL: https://philanthropel.com/support — **does not exist yet (404)**
-- Privacy Policy URL: https://philanthropel.com/privacy — live, but covers only
-  the website; add the Penname section below
+- Support URL: https://philanthropel.com/penname/support
+- Privacy Policy URL: https://philanthropel.com/privacy (now has a
+  "The Penname app" section)
 
-`[CONFIRM]` marks details I could not verify.
+The published wording is in the website project (`app/penname/support/page.tsx`,
+`app/privacy/page.tsx` and their markdown mirrors in `public/md/`). The text
+below is the draft it was written from, kept for reference. Contact address
+used on the site: info@philanthropel.com.
 
 ---
 
-## 1. Support page — philanthropel.com/support
+## 1. Support page — philanthropel.com/penname/support
 
 ### Penname support
 
@@ -19,8 +21,7 @@ Penname gives private details a pen name before you share a document with an
 AI assistant, and brings the real details back afterwards. Everything happens
 on your device.
 
-**Get help:** email [CONFIRM: support@philanthropel.com]. We aim to reply
-within [CONFIRM: two working days]. Please do not send us donor data or key
+**Get help:** email info@philanthropel.com. Every message is read and answered by a person. Please do not send us donor data or key
 files — we never need them to help you.
 
 #### Common questions
@@ -86,7 +87,7 @@ cannot recover either.
 protected and restored: the document name, the date, and how many details
 were replaced. It never records the details themselves. The log is encrypted
 on the device; you can export it or erase it at any time from the Activity
-tab. Deleting the app deletes the log.
+tab.
 
 **What you share is your choice.** The only thing that leaves your device is
 what you choose to copy, share or save — normally the safe copy you paste
@@ -95,7 +96,7 @@ you paste into it.
 
 **Children.** Penname is a workplace tool and is not directed at children.
 
-**Contact.** [CONFIRM: privacy@philanthropel.com] · Philanthropel Limited,
-[CONFIRM: registered address and company number].
+**Contact.** info@philanthropel.com · Philanthropel Limited, registered in
+Scotland, company number SC895988.
 
-*Last updated: [CONFIRM: date of publication].*
+*Last updated: 5 October 2026.*

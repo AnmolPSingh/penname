@@ -1,0 +1,26 @@
+Constituent ID,Name,Email,Phone,Address,Town,Postcode,Gift,Date,Fund,Gift Aid
+C-10400,Alice Abernethy,alice.abernethy@example.org,07700 900100,3 Mill Lane,Leeds,LS1 4AP,£25,01/01/2025,GEN-2025,No
+C-10407,Benjamin Braithwaite,benjamin.braithwaite@example.org,020 7946 0101,7 Church Road,York,YO1 7HH,£50,04/06/2025,CW-2025,Yes
+C-10414,Catriona Carmichael,catriona.carmichael@example.org,01632 960102,11 Station Road,Cardiff,CF10 1EP,£100,07/11/2025,YTH-2024,Yes
+C-10421,Declan Devereux,declan.devereux@example.org,+44 7700 900203,15 Victoria Avenue,Glasgow,G1 1XQ,£250,10/04/2025,EDU-2025,No
+C-10428,Eleanor Etherington,eleanor.etherington@example.org,07700 900104,19 Orchard Close,Norwich,NR1 3QY,£500,13/09/2025,GEN-2025,Yes
+C-10435,Fergus Fotheringham,fergus.fotheringham@example.org,020 7946 0105,23 Kings Drive,Exeter,EX1 1EE,"£1,000",16/02/2025,CW-2025,Yes
+C-10442,Gemma Galloway,gemma.galloway@example.org,01632 960106,27 Chapel Street,Durham,DH1 3NJ,"£1,250",19/07/2025,YTH-2024,No
+C-10449,Hamish Hetherington,hamish.hetherington@example.org,+44 7700 900207,31 Park Terrace,Oxford,OX1 2JD,"£2,500",22/12/2025,EDU-2025,Yes
+C-10456,Imogen Inglewood,imogen.inglewood@example.org,07700 900108,35 Meadow Way,Dundee,DD1 4HN,"£5,000",25/05/2025,GEN-2025,Yes
+C-10463,Jerome Jardine,jerome.jardine@example.org,020 7946 0109,39 Abbey Gardens,Truro,TR1 2AF,"£10,000",01/10/2025,CW-2025,No
+C-10470,Kirsty Kilbride,kirsty.kilbride@example.org,01632 960110,43 Mill Lane,Leeds,LS1 4AP,£25,04/03/2025,YTH-2024,Yes
+C-10477,Lionel Lachlan,lionel.lachlan@example.org,+44 7700 900211,47 Church Road,York,YO1 7HH,£50,07/08/2025,EDU-2025,Yes
+C-10484,Maeve MacAllister,maeve.macallister@example.org,07700 900112,51 Station Road,Cardiff,CF10 1EP,£100,10/01/2025,GEN-2025,No
+C-10491,Nigel Nethercott,nigel.nethercott@example.org,020 7946 0113,55 Victoria Avenue,Glasgow,G1 1XQ,£250,13/06/2025,CW-2025,Yes
+C-10498,Orla O'Rourke,orla.orourke@example.org,01632 960114,59 Orchard Close,Norwich,NR1 3QY,£500,16/11/2025,YTH-2024,Yes
+C-10505,Philippa Pettigrew,philippa.pettigrew@example.org,+44 7700 900215,63 Kings Drive,Exeter,EX1 1EE,"£1,000",19/04/2025,EDU-2025,No
+C-10512,Rhys Quennell,rhys.quennell@example.org,07700 900116,67 Chapel Street,Durham,DH1 3NJ,"£1,250",22/09/2025,GEN-2025,Yes
+C-10519,Siobhan Rutherford,siobhan.rutherford@example.org,020 7946 0117,71 Park Terrace,Oxford,OX1 2JD,"£2,500",25/02/2025,CW-2025,Yes
+C-10526,Tristan Sedgwick,tristan.sedgwick@example.org,01632 960118,75 Meadow Way,Dundee,DD1 4HN,"£5,000",01/07/2025,YTH-2024,No
+C-10533,Ursula Thistlewood,ursula.thistlewood@example.org,+44 7700 900219,79 Abbey Gardens,Truro,TR1 2AF,"£10,000",04/12/2025,EDU-2025,Yes
+C-10540,Vincent Underwood,vincent.underwood@example.org,07700 900120,83 Mill Lane,Leeds,LS1 4AP,£25,07/05/2025,GEN-2025,Yes
+C-10547,Winifred Venables,winifred.venables@example.org,020 7946 0121,87 Church Road,York,YO1 7HH,£50,10/10/2025,CW-2025,No
+C-10554,Zachary Wetherby,zachary.wetherby@example.org,01632 960122,91 Station Road,Cardiff,CF10 1EP,£100,13/03/2025,YTH-2024,Yes
+C-10561,Yasmin Yardley,yasmin.yardley@example.org,+44 7700 900223,95 Victoria Avenue,Glasgow,G1 1XQ,£250,16/08/2025,EDU-2025,Yes
+C-10568,Rupert Lloyd-Jones,rupert.lloydjones@example.org,07700 900124,99 Orchard Close,Norwich,NR1 3QY,£500,19/01/2025,GEN-2025,No

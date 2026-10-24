@@ -1,0 +1,22 @@
+Things Penname may NOT catch on its own. Use this file to practise the
+"Penname missed something? Add it here" box on the review screen.
+
+1. Lowercase names in quick notes:
+   spoke with jane smith re her legacy pledge
+
+2. Organisations without "Foundation", "Trust" or similar in the name:
+   A matched grant from Oxfam and Barclays is expected.
+
+3. Amounts written in words:
+   She has promised ten thousand pounds over two years.
+
+4. Bare numbers with no currency sign:
+   Gift Aid reference 123456789. Last gift 5000.
+
+5. A surname listed before a first name:
+   Smith, Jane
+   Okafor, David
+
+These should all be caught (for comparison):
+   Dear Margaret Wilson, your gift of £2,500 arrived on 14 March 2025.
+   Call 020 7946 0958 or write to margaret@example.org.
