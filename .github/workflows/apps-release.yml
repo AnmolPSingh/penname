@@ -1,0 +1,117 @@
+name: Apps release
+
+# Builds the Penname app (the same web app that ships on the App Store) for
+# Android (signed APK) and Windows (NSIS installer), then drafts a GitHub
+# release. Tags use the app-v* prefix so the Python desktop workflow
+# (release.yml, v* tags) does not run. workflow_dispatch builds without
+# releasing; pull requests that touch the apps build too, as a check.
+
+on:
+  push:
+    tags:
+      - "app-v*"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "ios/**"
+      - "ios-native/**"
+      - "macos/**"
+      - ".github/workflows/apps-release.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Engine tests
+        run: node ios/test_engine.js
+
+      - name: Sync the web app into the Android project
+        working-directory: ios-native
+        run: |
+          npm ci
+          npm run sync
+          npx cap sync android
+
+      - name: Build the signed APK
+        working-directory: ios-native/android
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          export ANDROID_KEYSTORE="$RUNNER_TEMP/penname.p12"
+          echo "$ANDROID_KEYSTORE_B64" | base64 -d > "$ANDROID_KEYSTORE"
+          ./gradlew --no-daemon assembleRelease
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/out/Penname-android.apk"
+          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$GITHUB_WORKSPACE/out/Penname-android.apk" | head -3
+          rm -f "$ANDROID_KEYSTORE"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: out/Penname-android.apk
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build the installer
+        working-directory: macos
+        shell: bash
+        run: |
+          npm ci
+          npm run sync
+          npx tauri build --bundles nsis
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp src-tauri/target/release/bundle/nsis/*-setup.exe "$GITHUB_WORKSPACE/out/Penname-windows-setup.exe"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: out/Penname-windows-setup.exe
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/app-v')
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+
+      - name: SHA-256 checksums
+        working-directory: out
+        run: for f in *.apk *.exe; do sha256sum "$f" | tee "$f.sha256"; done
+
+      # Drafted, not published: install both on real devices, then publish.
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: Penname ${{ github.ref_name }} for Android and Windows
+          body: |
+            Penname gives the private details in a document stand-in names before you share it or paste it into an AI tool, then puts the real details back. Everything stays on your device.
+
+            **iPhone, iPad and Mac:** [App Store](https://apps.apple.com/app/id6819083093)
+
+            **Android:** download `Penname-android.apk`, open it, and allow installing from this source when asked.
+
+            **Windows:** download `Penname-windows-setup.exe` and run it. Windows SmartScreen may warn about an unrecognised app: choose *More info*, then *Run anyway*.
+          files: out/*

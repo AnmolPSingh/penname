@@ -1,4 +1,4 @@
-// Penname for macOS — a thin native shell around the Penname web app.
+// Penname for macOS and Windows — a thin native shell around the Penname web app.
 // No plugins and no network: the whole product is the bundled web app,
 // exactly as on iOS. The shell adds two things the sandboxed web view cannot
 // do itself: a Save dialog, and opening philanthropel.com in the browser.
@@ -20,6 +20,13 @@ async fn save_file(name: String, bytes: Vec<u8>) -> Result<bool, String> {
     Ok(true)
 }
 
+fn open_in_browser(url: &str) {
+    #[cfg(target_os = "macos")]
+    let _ = std::process::Command::new("/usr/bin/open").arg(url).spawn();
+    #[cfg(target_os = "windows")]
+    let _ = std::process::Command::new("explorer").arg(url).spawn();
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![save_file])
@@ -38,11 +45,12 @@ fn main() {
                     // The web view only ever shows the bundled app. Links to
                     // our own website open in the default browser; anything
                     // else goes nowhere.
-                    if url.scheme() == "tauri" {
+                    // macOS serves it as tauri://localhost, Windows as http(s)://tauri.localhost.
+                    if url.scheme() == "tauri" || url.host_str() == Some("tauri.localhost") {
                         return true;
                     }
                     if url.as_str().starts_with(WEBSITE) {
-                        let _ = std::process::Command::new("/usr/bin/open").arg(url.as_str()).spawn();
+                        open_in_browser(url.as_str());
                     }
                     false
                 })

@@ -29,7 +29,12 @@ const TYPE_LABELS = {
 
 /* The macOS app (Tauri) saves through a Save dialog in its native shell. */
 const IS_MAC_APP = !!window.__TAURI_INTERNALS__;
-const SAVED_WHERE = "Saved ✓";
+
+/* The Android app has no share-to-Files or download, so it writes into the
+ * phone's Documents/Penname folder, where the file picker finds it again. */
+const IS_ANDROID_APP = !!(window.Capacitor && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === "android");
+const ANDROID_FOLDER = "Penname";
+const SAVED_WHERE = IS_ANDROID_APP ? "Saved to Documents ✓" : "Saved ✓";
 
 const MIN_PASSPHRASE = 8;
 const MAX_DOCUMENT_CHARS = 1000000; // ~1 MB of text; larger files stall a phone
@@ -37,10 +42,10 @@ const MAX_DOCUMENT_CHARS = 1000000; // ~1 MB of text; larger files stall a phone
 /* In the iOS app (and iOS Safari) a download link does nothing useful, so
  * files go through the system share sheet, which offers "Save to Files".
  * Desktop browsers keep the ordinary download. */
-const SHARE_FILES =
+const SHARE_FILES = !IS_ANDROID_APP && (
   !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) ||
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
 /* ---------------- App state ---------------- */
 
@@ -369,7 +374,9 @@ $("btn-download-key").addEventListener("click", async () => {
     }
     if (outcome === "cancelled") return;
     state.pendingKey = null;
-    note.textContent = SHARE_FILES
+    note.textContent = IS_ANDROID_APP
+      ? `✓ Key file saved in Documents › ${ANDROID_FOLDER}. Keep it somewhere safe, with your passphrase.`
+      : SHARE_FILES
       ? "✓ Key file handed over. If you chose “Save to Files”, it is on this device — keep it with your passphrase."
       : "✓ Key file saved. Keep it somewhere safe, with your passphrase.";
     note.classList.remove("hidden");
@@ -583,6 +590,10 @@ async function saveFile(blob, filename) {
     } catch (e) { throw new Error(String(e)); } // the shell rejects with a plain string
     return saved ? "downloaded" : "cancelled";
   }
+  if (IS_ANDROID_APP) {
+    await saveToAndroidDocuments(blob, filename);
+    return "downloaded";
+  }
   if (!SHARE_FILES) {
     downloadBlob(blob, filename);
     return "downloaded";
@@ -598,6 +609,25 @@ async function saveFile(blob, filename) {
     if (e.name === "AbortError") return "cancelled";
     if (e.name === "NotAllowedError") return "needs-tap";
     throw e;
+  }
+}
+
+/** Write into Documents/Penname. A file left by an earlier install belongs to
+ *  that install and cannot be overwritten, so a clash gets a numbered name. */
+async function saveToAndroidDocuments(blob, filename) {
+  const fs = window.Capacitor.Plugins.Filesystem;
+  const data = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1]);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+  const dot = filename.lastIndexOf(".");
+  const write = (name) => fs.writeFile({ path: `${ANDROID_FOLDER}/${name}`, data, directory: "DOCUMENTS", recursive: true });
+  try {
+    await write(filename);
+  } catch (e) {
+    await write(`${filename.slice(0, dot)}-${Date.now()}${filename.slice(dot)}`);
   }
 }
 
