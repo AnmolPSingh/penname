@@ -10,6 +10,10 @@ assistant for help, then puts them back when you're done.<br>
 It runs on your own computer. It never uses the internet.
 </p>
 
+<p align="center">
+<a href="https://philanthropel.com/penname"><b>philanthropel.com/penname</b></a> · screenshots, downloads for every platform, and how it works
+</p>
+
 ---
 
 ## What Penname does
@@ -328,11 +332,12 @@ Compare the result to the `.sha256` file published with the release.
 ## A free, open-source tool for nonprofits, by Philanthropel
 
 <p align="center">
-  <img src="brand/philanthropel-card.png" alt="Philanthropel" width="360">
+  <a href="https://philanthropel.com"><img src="brand/philanthropel-card.png" alt="Philanthropel" width="360"></a>
 </p>
 
-Penname is made and maintained by **Philanthropel**, and given freely to the
-nonprofit and philanthropy community.
+Penname is made and maintained by **[Philanthropel](https://philanthropel.com)**,
+which builds bespoke agentic systems for the third sector, and is given freely
+to the nonprofit and philanthropy community.
 
 **© 2026 Philanthropel Limited.**
 
